@@ -9,7 +9,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 # ---------- scene ----------
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene=bpy.context.scene
-scene.render.engine='BLENDER_EEVEE_NEXT' if hasattr(scene,'eevee') or bpy.app.version >= (4,2,0) else 'BLENDER_EEVEE'
+scene.render.engine='BLENDER_EEVEE_NEXT' if bpy.app.version >= (4,2,0) else 'BLENDER_EEVEE'
 scene.render.resolution_x=1000; scene.render.resolution_y=1000; scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG'
 if scene.world is None:
