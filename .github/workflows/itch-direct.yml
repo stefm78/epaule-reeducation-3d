@@ -1,0 +1,79 @@
+name: Direct Quaternius full-body acquisition
+on:
+  push:
+    branches: [agent/human-v2-asset-lab]
+    paths: [.github/workflows/itch-direct.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/human-v2-asset-lab
+      - name: Resolve signed URL and download package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/qdirect assets/quaternius/fullbody research/itch-direct
+          mkdir -p /tmp/qdirect assets/quaternius/fullbody research/itch-direct
+          ENDPOINT='https://quaternius.itch.io/universal-base-characters/file/15861669?source=game_download&after_download_lightbox=1&as_props=1'
+          curl -fsSL -X POST -H 'Accept: application/json' -H 'X-Requested-With: XMLHttpRequest' "$ENDPOINT" -o /tmp/qdirect/props.json
+          cp /tmp/qdirect/props.json research/itch-direct/props.json
+          URL="$(python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/qdirect/props.json'))
+          def find(v):
+            if isinstance(v,str) and v.startswith('http'):return v
+            if isinstance(v,dict):
+              for k in ('url','download_url','href'):
+                if k in v:
+                  r=find(v[k])
+                  if r:return r
+              for z in v.values():
+                r=find(z)
+                if r:return r
+            if isinstance(v,list):
+              for z in v:
+                r=find(z)
+                if r:return r
+          print(find(x) or '')
+          PY
+          )"
+          test -n "$URL"
+          curl -fL --retry 3 "$URL" -o /tmp/qdirect/standard.zip
+          unzip -q /tmp/qdirect/standard.zip -d /tmp/qdirect/unpacked
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,shutil
+          root=Path('/tmp/qdirect/unpacked')
+          matches=[p for p in root.rglob('Superhero_Male_FullBody.gltf') if 'Godot - UE' in str(p)]
+          if not matches: matches=list(root.rglob('Superhero_Male_FullBody.gltf'))
+          if not matches: raise SystemExit('FULL_BODY_NOT_FOUND')
+          src=matches[0];data=json.loads(src.read_text());out=Path('assets/quaternius/fullbody');out.mkdir(parents=True,exist_ok=True)
+          shutil.copy2(src,out/src.name);deps=[]
+          for group in ('buffers','images'):
+            for item in data.get(group,[]):
+              uri=item.get('uri','')
+              if uri and not uri.startswith('data:'):
+                source=(src.parent/uri).resolve();dest=out/uri;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest);deps.append(uri)
+          rep={'source':str(src.relative_to(root)),'dependencies':deps,'bytes':sum(p.stat().st_size for p in out.rglob('*') if p.is_file())}
+          Path('research/itch-direct/selection.json').write_text(json.dumps(rep,indent=2))
+          PY
+          cat > assets/quaternius/fullbody/LICENSE.md <<'EOF'
+          Universal Base Characters by Quaternius — CC0 1.0 Universal.
+          Source: https://quaternius.com/packs/universalbasecharacters.html
+          Selected asset: Superhero_Male_FullBody.gltf.
+          EOF
+          find assets/quaternius/fullbody -type f -printf '%P\t%s bytes\n' | sort > research/itch-direct/inventory.txt
+          du -sh assets/quaternius/fullbody
+      - name: Commit full body
+        run: |
+          git config user.name epaule-3d-asset-lab
+          git config user.email 104558808+stefm78@users.noreply.github.com
+          git add assets/quaternius/fullbody research/itch-direct
+          git commit -m 'feat: acquire exact Quaternius full-body human directly'
+          git push origin HEAD:agent/human-v2-asset-lab
