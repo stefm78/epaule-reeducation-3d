@@ -1,0 +1,78 @@
+name: Direct Quaternius full-body acquisition v2
+on:
+  push:
+    branches: [agent/human-v2-asset-lab]
+    paths: [.github/workflows/itch-direct-v2.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/human-v2-asset-lab}
+      - name: Download, repair package references, select full body
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/qv2 assets/quaternius/fullbody research/itch-direct-v2
+          mkdir -p /tmp/qv2 assets/quaternius/fullbody research/itch-direct-v2
+          curl -fsSL -X POST -H 'Accept: application/json' -H 'X-Requested-With: XMLHttpRequest' 'https://quaternius.itch.io/universal-base-characters/file/15861669?source=game_download&after_download_lightbox=1&as_props=1' -o /tmp/qv2/props.json
+          URL="$(python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/qv2/props.json'))
+          def f(v):
+            if isinstance(v,str) and v.startswith('http'):return v
+            if isinstance(v,dict):
+              for k in ('url','download_url','href'):
+                if k in v and (r:=f(v[k])):return r
+              for z in v.values():
+                if (r:=f(z)):return r
+            if isinstance(v,list):
+              for z in v:
+                if (r:=f(z)):return r
+          print(f(x) or '')
+          PY
+          )"
+          curl -fL --retry 3 "$URL" -o /tmp/qv2/standard.zip
+          unzip -q /tmp/qv2/standard.zip -d /tmp/qv2/unpacked
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,shutil
+          root=Path('/tmp/qv2/unpacked');out=Path('assets/quaternius/fullbody');out.mkdir(parents=True,exist_ok=True)
+          matches=[p for p in root.rglob('Superhero_Male_FullBody.gltf') if 'Godot - UE' in str(p)] or list(root.rglob('Superhero_Male_FullBody.gltf'))
+          if not matches:raise SystemExit('FULL_BODY_NOT_FOUND')
+          src=matches[0];data=json.loads(src.read_text());shutil.copy2(src,out/src.name);resolved=[]
+          all_files=[p for p in root.rglob('*') if p.is_file()]
+          by_lower={p.name.lower():p for p in all_files}
+          for group in ('buffers','images'):
+            for item in data.get(group,[]):
+              uri=item.get('uri','')
+              if not uri or uri.startswith('data:'):continue
+              source=(src.parent/uri).resolve();method='exact'
+              if not source.exists():
+                names=[Path(uri).name,Path(uri).name.replace('_png.png','.png'),Path(uri).name.replace('_jpg.jpg','.jpg')]
+                source=next((by_lower[n.lower()] for n in names if n.lower() in by_lower),None);method='repaired-name'
+              if source is None or not source.exists():raise SystemExit('MISSING_DEPENDENCY:'+uri)
+              dest=out/uri;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
+              resolved.append({'uri':uri,'source':str(source.relative_to(root)),'method':method,'bytes':source.stat().st_size})
+          rep={'source':str(src.relative_to(root)),'resolved':resolved,'bytes':sum(p.stat().st_size for p in out.rglob('*') if p.is_file())}
+          Path('research/itch-direct-v2/selection.json').write_text(json.dumps(rep,indent=2))
+          PY
+          cat > assets/quaternius/fullbody/LICENSE.md <<'EOF'
+          Universal Base Characters by Quaternius — CC0 1.0 Universal.
+          Source: https://quaternius.com/packs/universalbasecharacters.html
+          Selected asset: Superhero_Male_FullBody.gltf.
+          EOF
+          cp /tmp/qv2/props.json research/itch-direct-v2/props.json
+          find assets/quaternius/fullbody -type f -printf '%P\t%s bytes\n' | sort > research/itch-direct-v2/inventory.txt
+          du -sh assets/quaternius/fullbody
+      - name: Commit full body
+        run: |
+          git config user.name epaule-3d-asset-lab
+          git config user.email 104558808+stefm78@users.noreply.github.com
+          git add assets/quaternius/fullbody research/itch-direct-v2
+          git commit -m 'feat: acquire repaired Quaternius CC0 full-body human'
+          git push origin HEAD:agent/human-v2-asset-lab
