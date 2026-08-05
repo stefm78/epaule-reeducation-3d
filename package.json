@@ -1,0 +1,1 @@
+{"name":"epaule-reeducation-3d","private":true,"scripts":{"build:v4":"esbuild src/app-v4.js --bundle --minify --format=iife --target=es2020 --outfile=app-v4.bundle.js"},"dependencies":{"three":"0.181.1"},"devDependencies":{"esbuild":"0.25.9"}}
