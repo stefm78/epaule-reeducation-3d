@@ -1,4 +1,4 @@
-name: Final V4 movement correction
+name: Final V4 camera correction
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -11,44 +11,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: agent/human-v4-quaternius}
-      - name: Restore eighth exercise and refine key movements
+      - name: Frame each movement for immediate readability
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('src/app-v4.js');s=p.read_text()
-          airplane="{id:'airplane',title:'L’avion en quadrupédie',cat:'Stabilité scapulaire',summary:'À quatre pattes, décoller le bras gauche latéralement comme une aile, sans tourner le bassin ni relever le menton.',steps:['Placer les mains sous les épaules et les genoux sous les hanches.','Rentrer légèrement le menton et garder le dos neutre.','Lever le bras gauche latéralement, coude presque tendu.','Revenir lentement sous l’épaule.'],cues:['Bassin parallèle au sol.','Épaule gauche loin de l’oreille.','Amplitude sans rotation forcée du thorax.'],dose:[3,10,'Sans charge'],muscles:[['Deltoïde',3],['Trapèze moyen',2],['Rhomboïdes',2],['Coiffe',2]]},\n"
-          marker="{id:'dive',title:'Pompe plongeante arrière–avant'"
-          if marker not in s: raise SystemExit('DIVE_OBJECT_NOT_FOUND')
-          s=s.replace(marker,airplane+marker,1)
-          s=s.replace("showMuscles=true","showMuscles=false",1)
-          s=s.replace("camera.position.set(5.0,2.35,isSupine?-.45:.8)","camera.position.set(4.2,2.15,isSupine?-.35:.95)",1)
-          s=s.replace("function support({y=.72,z=0,x=0,bend=.08,left=null,knees=true})","function support({y=.72,z=0,x=0,bend=.08,left=null,knees=true,handLift=0})",1)
-          s=s.replace("const handL=V(.27,.025,1.66),handR=V(-.27,.025,1.66);","const handL=V(.27,.025+handLift,1.66),handR=V(-.27,.025+handLift,1.66);",1)
-          old="if(ex.id==='clap'){const lift=Math.max(0,1-Math.abs(u-.5)*8);support({y:.73-.34*wave+.09*lift,bend:.55*wave})}"
-          new="if(ex.id==='clap'){let y=.74,b=.08,h=0;if(u<.30){const a=(1-Math.cos(u/.30*Math.PI))/2;y=.74-.30*a;b=.08+.58*a}else if(u<.50){const a=(1-Math.cos((u-.30)/.20*Math.PI))/2;y=.44+.37*a;b=.66*(1-a);h=.14*a}else if(u<.68){const a=(1-Math.cos((u-.50)/.18*Math.PI))/2;y=.81-.07*a;b=.10*a;h=.14*(1-a)}else{const a=(1-Math.cos((u-.68)/.32*Math.PI))/2;y=.74;b=.10*(1-a)}support({y,bend:b,handLift:h})}"
-          if old not in s: raise SystemExit('CLAP_BRANCH_NOT_FOUND')
-          s=s.replace(old,new,1)
-          old="}else if(ex.id==='supine'){supine(wave)}else if(ex.id==='dive'){let y,z,b;if(u<.2){const a=u/.2;y=.78;z=-.32*(1-a);b=.12}else if(u<.46){const a=(u-.2)/.26;y=.78-.48*a;z=.02+.08*a;b=.8*a}else if(u<.67){const a=(u-.46)/.21;y=.30;z=.10+.53*a;b=.8}else if(u<.84){const a=(u-.67)/.17;y=.30+.48*a;z=.63;b=.8*(1-a)}else{const a=(u-.84)/.16;y=.78;z=.63-.95*a;b=.12}support({y,z,bend:b})}"
-          new="}else if(ex.id==='supine'){supine(wave)}else if(ex.id==='airplane'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const sh=wp('upperarm_l'),sg=sh.x>0?1:-1,el=sh.clone().add(V(.42*sg,.08*wave,.02)),wr=sh.clone().add(V(.82*sg,.10*wave,.04));support({left:{elbow:el,wrist:wr},bend:.08})}else if(ex.id==='dive'){let y,z,b;if(u<.15){const a=u/.15;y=.82;z=.30-.15*a;b=.08}else if(u<.30){const a=(u-.15)/.15;y=.82-.52*a;z=.15;b=.08+.78*a}else if(u<.55){const a=(u-.30)/.25;y=.30;z=.15+.83*a;b=.86}else if(u<.75){const a=(u-.55)/.20;y=.30+.48*a;z=.98;b=.86*(1-a)}else{const a=(u-.75)/.25;y=.78+.04*a;z=.98-.68*a;b=.06}support({y,z,bend:b})}"
-          if old not in s: raise SystemExit('DIVE_BRANCH_NOT_FOUND')
-          s=s.replace(old,new,1)
-          s=s.replace("rotate:[1,.7,.35,.9],reach:","rotate:[1,.7,.35,.9],airplane:[1,.55,.4,.9],reach:",1)
-          old="Object.values(overlay).forEach((m,i)=>m.scale.setScalar(map[i]))"
-          new="const shapes=[[1.15,.55,1],[.55,1.5,.55],[1.45,.45,1],[1.3,.4,1.4]];Object.values(overlay).forEach((m,i)=>m.scale.set(shapes[i][0]*map[i],shapes[i][1]*map[i],shapes[i][2]*map[i]))"
-          if old not in s: raise SystemExit('OVERLAY_SCALE_NOT_FOUND')
-          s=s.replace(old,new,1)
-          p.write_text(s)
-          index=Path('index-v4.html');index.write_text(index.read_text().replace('SEPT EXERCICES','HUIT EXERCICES').replace('id="muscles" class="active"','id="muscles"'))
-          qa=Path('qa/v4-browser.mjs');q=qa.read_text()
-          q=q.replace('!== 7','!== 8').replace('Expected 7 exercises','Expected 8 exercises')
-          q=q.replace("['clap','shift','supine','dive','row','rotate','reach']","['clap','shift','supine','airplane','dive','row','rotate','reach']")
-          q=q.replace('for (let i = 0; i < 7; i++)','for (let i = 0; i < 8; i++)')
-          q=q.replace("exercises.nth(3).click()","exercises.nth(4).click()")
-          q=q.replace("mobile.locator('.exercise').nth(3).click()","mobile.locator('.exercise').nth(4).click()")
-          qa.write_text(q)
+          old="function frameCurrent(){const isSupine=EX[current].id==='supine';camera.position.set(4.2,2.15,isSupine?-.35:.95);controls.target.set(0,.58,isSupine?-.78:.82);controls.update()}"
+          new="function frameCurrent(){const id=EX[current].id;if(id==='supine'){camera.position.set(4.8,2.8,-.45);controls.target.set(0,.42,-.35)}else if(id==='airplane'){camera.position.set(3.2,2.25,-3.2);controls.target.set(0,.62,.72)}else if(id==='dive'){camera.position.set(5.4,2.35,.95);controls.target.set(0,.52,.62)}else{camera.position.set(4.4,2.15,.95);controls.target.set(0,.58,.82)}controls.update()}"
+          if old not in s: raise SystemExit('FRAME_FUNCTION_NOT_FOUND')
+          p.write_text(s.replace(old,new,1))
           PY
           git config user.name epaule-v4-correction
           git config user.email 104558808+stefm78@users.noreply.github.com
-          git add src/app-v4.js index-v4.html qa/v4-browser.mjs
-          git commit -m 'fix: restore airplane exercise and refine dynamic movements'
+          git add src/app-v4.js
+          git commit -m 'fix: frame airplane and dive movements clearly'
           git push origin HEAD:agent/human-v4-quaternius
