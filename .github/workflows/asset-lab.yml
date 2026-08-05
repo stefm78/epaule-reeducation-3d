@@ -1,0 +1,62 @@
+name: Human asset lab
+
+on:
+  push:
+    branches:
+      - agent/human-v2-asset-lab
+    paths:
+      - .github/workflows/asset-lab.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inspect-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/human-v2-asset-lab
+      - name: Inspect candidate download pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research
+          curl -fsSL --retry 3 --retry-delay 2 \
+            'https://quaternius.com/packs/universalbasecharacters.html' \
+            -o research/quaternius-base-characters.html
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          from urllib.parse import urljoin
+
+          base = 'https://quaternius.com/packs/universalbasecharacters.html'
+          text = Path('research/quaternius-base-characters.html').read_text(errors='replace')
+          class Links(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.links=[]
+              def handle_starttag(self, tag, attrs):
+                  if tag == 'a':
+                      href = dict(attrs).get('href')
+                      if href: self.links.append(urljoin(base, href))
+          p=Links(); p.feed(text)
+          links=sorted(set(p.links))
+          Path('research/quaternius-links.txt').write_text('\n'.join(links)+'\n')
+          PY
+          {
+            echo '# Candidate asset links';
+            grep -Ei 'download|itch|zip|drive|dropbox|storage|cdn' research/quaternius-links.txt || true;
+          } > research/asset-lab-report.md
+      - name: Commit inspection report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'epaule-3d-asset-lab'
+          git config user.email '104558808+stefm78@users.noreply.github.com'
+          git add research/
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'chore: inspect CC0 human asset sources'
+          git push origin HEAD:agent/human-v2-asset-lab
