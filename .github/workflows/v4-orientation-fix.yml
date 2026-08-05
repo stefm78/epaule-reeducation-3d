@@ -1,0 +1,49 @@
+name: Apply V4 ground orientation correction
+on:
+  push:
+    branches: [agent/human-v4-quaternius]
+    paths: [.github/workflows/v4-orientation-fix.yml]
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/human-v4-quaternius}
+      - name: Correct prone and supine coordinate frames
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/app-v4.js');s=p.read_text()
+          changes={
+          "camera.position.set(3.7,2.35,2.8);":"camera.position.set(5.0,2.4,.5);",
+          "controls.target.set(0,.72,-.65);":"controls.target.set(0,.62,.25);",
+          "pivot.rotation.x=-Math.PI/2;pivot.position.set(x,y,z)":"pivot.rotation.x=Math.PI/2;pivot.position.set(x,y,z)",
+          "const handL=V(.27,.035,-1.43),handR=V(-.27,.035,-1.43);":"const handL=V(.27,.035,1.43),handR=V(-.27,.035,1.43);",
+          "const kl=V(hl.x,.055,-.48),kr=V(hr.x,.055,-.48),fl=V(hl.x,.08,-.02),fr=V(hr.x,.08,-.02);":"const kl=V(hl.x,.055,.48),kr=V(hr.x,.055,.48),fl=V(hl.x,.08,.02),fr=V(hr.x,.08,.02);",
+          "function supine(q){resetPose();pivot.rotation.x=Math.PI/2;":"function supine(q){resetPose();pivot.rotation.x=-Math.PI/2;",
+          "z=.32*(1-a)":"z=-.32*(1-a)",
+          "z=-.02-.08*a":"z=.02+.08*a",
+          "z=-.10-.53*a":"z=.10+.53*a",
+          "z=-.63;b=.8*(1-a)":"z=.63;b=.8*(1-a)",
+          "z=-.63+.95*a":"z=.63-.95*a",
+          "resetPose();pivot.rotation.x=-Math.PI/2;pivot.position.set(0,.72,0)":"resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0)",
+          "V(.26*sg,.18*a,.12)":"V(.26*sg,.18*a,-.12)",
+          "V(.12*sg,-.08+.22*a,.20)":"V(.12*sg,-.08+.22*a,-.20)",
+          "V(.26*sg,.18,.12)":"V(.26*sg,.18,-.12)",
+          "V(.12*sg,.11,.20+.62*a)":"V(.12*sg,.11,-.20-.62*a)",
+          "V(.04*sg,.02,-.38*wave)":"V(.04*sg,.02,.38*wave)",
+          "V(.05*sg,.04,-.82*wave)":"V(.05*sg,.04,.82*wave)",
+          "camera.position.set(3.7,2.35,2.8);controls.target.set(0,.72,-.65)":"camera.position.set(5.0,2.4,.5);controls.target.set(0,.62,.25)"
+          }
+          for old,new in changes.items():
+              if old not in s: raise SystemExit('MISSING_PATTERN: '+old)
+              s=s.replace(old,new)
+          p.write_text(s)
+          PY
+          git config user.name epaule-v4-correction
+          git config user.email 104558808+stefm78@users.noreply.github.com
+          git add src/app-v4.js
+          git commit -m 'fix: orient prone exercises face down and supine face up'
+          git push origin HEAD:agent/human-v4-quaternius
