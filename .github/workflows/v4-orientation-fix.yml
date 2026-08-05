@@ -1,4 +1,4 @@
-name: V4 final range correction
+name: V4 articulated dive correction
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -11,24 +11,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: agent/human-v4-quaternius}
-      - name: Keep dive translation within kneeling reach
+      - name: Articulate the torso while preserving four ground contacts
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('src/app-v4.js');s=p.read_text()
-          changes={
-          "camera.position.set(1.5,2.45,-5.2)":"camera.position.set(1.2,2.25,-4.25)",
-          "z=.16+.62*a":"z=.16+.34*a",
-          "z=.78;b=.78*(1-a)":"z=.50;b=.78*(1-a)",
-          "z=.78-.73*a":"z=.50-.45*a"
-          }
-          for old,new in changes.items():
-              if old not in s: raise SystemExit('MISSING_PATTERN: '+old)
-              s=s.replace(old,new,1)
+          marker="function supine(q){"
+          helper="""function leanTorso(a){if(!a)return;model.updateMatrixWorld(true);let p=wp('spine_01');aim('spine_01','spine_02',p.clone().add(V(0,-.16*a,.22*a)));model.updateMatrixWorld(true);p=wp('spine_02');aim('spine_02','spine_03',p.clone().add(V(0,-.14*a,.24*a)));model.updateMatrixWorld(true)}
+function groundHands(bend=.5){model.updateMatrixWorld(true);const sl=wp('upperarm_l'),sr=wp('upperarm_r'),hl=V(.27,.025,1.66),hr=V(-.27,.025,1.66),el=sl.clone().lerp(hl,.52).add(V(.16*bend,.05,0)),er=sr.clone().lerp(hr,.52).add(V(-.16*bend,.05,0));aim('upperarm_l','lowerarm_l',el);aim('lowerarm_l','hand_l',hl);aim('hand_l','middle_01_l',hl.clone().add(V(0,0,.22)));aim('upperarm_r','lowerarm_r',er);aim('lowerarm_r','hand_r',hr);aim('hand_r','middle_01_r',hr.clone().add(V(0,0,.22)));model.updateMatrixWorld(true)}
+"""
+          if marker not in s: raise SystemExit('SUPINE_MARKER_NOT_FOUND')
+          s=s.replace(marker,helper+marker,1)
+          old="if(u<.15){const a=u/.15;y=.72;z=.05-.05*a;b=.08}else if(u<.32){const a=(u-.15)/.17;y=.72-.27*a;z=.00+.16*a;b=.08+.70*a}else if(u<.58){const a=(u-.32)/.26;y=.45;z=.16+.34*a;b=.78}else if(u<.78){const a=(u-.58)/.20;y=.45+.27*a;z=.50;b=.78*(1-a)}else{const a=(u-.78)/.22;y=.72;z=.50-.45*a;b=.08}support({y,z,bend:b})"
+          new="if(u<.15){const a=u/.15;y=.72;z=-.08+.03*a;b=.08;var lean=.08*a}else if(u<.34){const a=(u-.15)/.19;y=.72-.18*a;z=-.05+.08*a;b=.08+.68*a;var lean=.08+.92*a}else if(u<.60){const a=(u-.34)/.26;y=.54;z=.03+.14*a;b=.76;var lean=1+.18*a}else if(u<.80){const a=(u-.60)/.20;y=.54+.18*a;z=.17;b=.76*(1-a);var lean=1.18*(1-a)}else{const a=(u-.80)/.20;y=.72;z=.17-.25*a;b=.08;var lean=0}support({y,z,bend:b});leanTorso(lean);groundHands(b)"
+          if old not in s: raise SystemExit('DIVE_RANGE_NOT_FOUND')
+          s=s.replace(old,new,1)
           p.write_text(s)
           PY
           git config user.name epaule-v4-correction
           git config user.email 104558808+stefm78@users.noreply.github.com
           git add src/app-v4.js
-          git commit -m 'fix: preserve knee contact through dive translation'
+          git commit -m 'fix: articulate dive torso around fixed knees and hands'
           git push origin HEAD:agent/human-v4-quaternius
