@@ -1,4 +1,4 @@
-name: Apply V4 posture and framing correction
+name: Repair V4 reset handler
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -11,42 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: agent/human-v4-quaternius}
-      - name: Correct knees, hands, framing and overlays
+      - name: Repair malformed reset handler
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
           p=Path('src/app-v4.js');s=p.read_text()
-          changes={
-          "[['shoulder',0xe93c2d,.16],['arm',0xe93c2d,.13],['chest',0xf18a34,.15],['scapula',0xf2c54e,.14]]":"[['shoulder',0xe93c2d,.11],['arm',0xe93c2d,.09],['chest',0xf18a34,.11],['scapula',0xf2c54e,.10]]",
-          "opacity:.48":"opacity:.30",
-          "const handL=V(.27,.035,1.43),handR=V(-.27,.035,1.43);":"const handL=V(.27,.025,1.66),handR=V(-.27,.025,1.66);",
-          "const kl=V(hl.x,.055,.48),kr=V(hr.x,.055,.48),fl=V(hl.x,.08,.02),fr=V(hr.x,.08,.02);":"const kl=V(hl.x,.045,.82),kr=V(hr.x,.045,.82),fl=V(hl.x,.055,.30),fr=V(hr.x,.055,.30);",
-          "=e.dose}renderInfo();":"=e.dose;frameCurrent()}",
-          "controls.maxDistance=7;":"controls.maxDistance=8;renderInfo();",
-          "controls.target.set(0,.65,-.65)":"controls.target.set(0,.62,EX[current].id==='supine'?-.8:.8)"
-          }
-          for old,new in changes.items():
-              if old not in s: raise SystemExit('MISSING_PATTERN: '+old)
-              s=s.replace(old,new)
-          anchor="const host=$('#viewer')"
-          frame="function frameCurrent(){const isSupine=EX[current].id==='supine';camera.position.set(5.0,2.35,isSupine?-.45:.8);controls.target.set(0,.58,isSupine?-.78:.82);controls.update()}\n\n"
-          if anchor not in s: raise SystemExit('MISSING_HOST_ANCHOR')
-          s=s.replace(anchor,frame+anchor,1)
-          s,n=re.subn(r"\$\('#resetView'\)\.onclick=.*?;","$('#resetView').onclick=frameCurrent;",s,count=1)
-          if n!=1: raise SystemExit('MISSING_RESET_HANDLER')
-          old="if(left){aim('upperarm_l','lowerarm_l',left.elbow);aim('lowerarm_l','hand_l',left.wrist)}else{aim('upperarm_l','lowerarm_l',elbowL);aim('lowerarm_l','hand_l',handL)}aim('upperarm_r','lowerarm_r',elbowR);aim('lowerarm_r','hand_r',handR);if(knees){"
-          new="if(left){aim('upperarm_l','lowerarm_l',left.elbow);aim('lowerarm_l','hand_l',left.wrist)}else{aim('upperarm_l','lowerarm_l',elbowL);aim('lowerarm_l','hand_l',handL);aim('hand_l','middle_01_l',handL.clone().add(V(0,0,.22)))}aim('upperarm_r','lowerarm_r',elbowR);aim('lowerarm_r','hand_r',handR);aim('hand_r','middle_01_r',handR.clone().add(V(0,0,.22)));if(knees){"
-          if old not in s: raise SystemExit('MISSING_HAND_CHAIN')
-          s=s.replace(old,new,1)
-          old2="aim('thigh_r','calf_r',kr);aim('calf_r','foot_r',fr)}model.updateMatrixWorld(true)}"
-          new2="aim('thigh_r','calf_r',kr);aim('calf_r','foot_r',fr);aim('foot_l','ball_l',fl.clone().add(V(0,-.01,-.18)));aim('foot_r','ball_r',fr.clone().add(V(0,-.01,-.18)))}model.updateMatrixWorld(true)}"
-          if old2 not in s: raise SystemExit('MISSING_FOOT_CHAIN')
-          s=s.replace(old2,new2,1)
-          p.write_text(s)
+          old="$('#resetView').onclick=frameCurrent;controls.target.set(0,.72,-.65)};"
+          if old not in s: raise SystemExit('MALFORMED_HANDLER_NOT_FOUND')
+          p.write_text(s.replace(old,"$('#resetView').onclick=frameCurrent;",1))
           PY
           git config user.name epaule-v4-correction
           git config user.email 104558808+stefm78@users.noreply.github.com
           git add src/app-v4.js
-          git commit -m 'fix: bend knees, flatten hands and frame each exercise'
+          git commit -m 'fix: repair reset view handler syntax'
           git push origin HEAD:agent/human-v4-quaternius
