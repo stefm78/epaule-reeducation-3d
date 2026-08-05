@@ -1,0 +1,540 @@
+{
+  "node_count": 69,
+  "mesh_count": 3,
+  "skin_count": 1,
+  "animation_count": 0,
+  "joint_count": 65,
+  "joints": [
+    {
+      "index": 0,
+      "name": "Head",
+      "children": []
+    },
+    {
+      "index": 1,
+      "name": "neck_01",
+      "children": [
+        0
+      ]
+    },
+    {
+      "index": 2,
+      "name": "index_04_leaf_l",
+      "children": []
+    },
+    {
+      "index": 3,
+      "name": "index_03_l",
+      "children": [
+        2
+      ]
+    },
+    {
+      "index": 4,
+      "name": "index_02_l",
+      "children": [
+        3
+      ]
+    },
+    {
+      "index": 5,
+      "name": "index_01_l",
+      "children": [
+        4
+      ]
+    },
+    {
+      "index": 6,
+      "name": "middle_04_leaf_l",
+      "children": []
+    },
+    {
+      "index": 7,
+      "name": "middle_03_l",
+      "children": [
+        6
+      ]
+    },
+    {
+      "index": 8,
+      "name": "middle_02_l",
+      "children": [
+        7
+      ]
+    },
+    {
+      "index": 9,
+      "name": "middle_01_l",
+      "children": [
+        8
+      ]
+    },
+    {
+      "index": 10,
+      "name": "pinky_04_leaf_l",
+      "children": []
+    },
+    {
+      "index": 11,
+      "name": "pinky_03_l",
+      "children": [
+        10
+      ]
+    },
+    {
+      "index": 12,
+      "name": "pinky_02_l",
+      "children": [
+        11
+      ]
+    },
+    {
+      "index": 13,
+      "name": "pinky_01_l",
+      "children": [
+        12
+      ]
+    },
+    {
+      "index": 14,
+      "name": "ring_04_leaf_l",
+      "children": []
+    },
+    {
+      "index": 15,
+      "name": "ring_03_l",
+      "children": [
+        14
+      ]
+    },
+    {
+      "index": 16,
+      "name": "ring_02_l",
+      "children": [
+        15
+      ]
+    },
+    {
+      "index": 17,
+      "name": "ring_01_l",
+      "children": [
+        16
+      ]
+    },
+    {
+      "index": 18,
+      "name": "thumb_04_leaf_l",
+      "children": []
+    },
+    {
+      "index": 19,
+      "name": "thumb_03_l",
+      "children": [
+        18
+      ]
+    },
+    {
+      "index": 20,
+      "name": "thumb_02_l",
+      "children": [
+        19
+      ]
+    },
+    {
+      "index": 21,
+      "name": "thumb_01_l",
+      "children": [
+        20
+      ]
+    },
+    {
+      "index": 22,
+      "name": "hand_l",
+      "children": [
+        5,
+        9,
+        13,
+        17,
+        21
+      ]
+    },
+    {
+      "index": 23,
+      "name": "lowerarm_l",
+      "children": [
+        22
+      ]
+    },
+    {
+      "index": 24,
+      "name": "upperarm_l",
+      "children": [
+        23
+      ]
+    },
+    {
+      "index": 25,
+      "name": "clavicle_l",
+      "children": [
+        24
+      ]
+    },
+    {
+      "index": 26,
+      "name": "index_04_leaf_r",
+      "children": []
+    },
+    {
+      "index": 27,
+      "name": "index_03_r",
+      "children": [
+        26
+      ]
+    },
+    {
+      "index": 28,
+      "name": "index_02_r",
+      "children": [
+        27
+      ]
+    },
+    {
+      "index": 29,
+      "name": "index_01_r",
+      "children": [
+        28
+      ]
+    },
+    {
+      "index": 30,
+      "name": "middle_04_leaf_r",
+      "children": []
+    },
+    {
+      "index": 31,
+      "name": "middle_03_r",
+      "children": [
+        30
+      ]
+    },
+    {
+      "index": 32,
+      "name": "middle_02_r",
+      "children": [
+        31
+      ]
+    },
+    {
+      "index": 33,
+      "name": "middle_01_r",
+      "children": [
+        32
+      ]
+    },
+    {
+      "index": 34,
+      "name": "pinky_04_leaf_r",
+      "children": []
+    },
+    {
+      "index": 35,
+      "name": "pinky_03_r",
+      "children": [
+        34
+      ]
+    },
+    {
+      "index": 36,
+      "name": "pinky_02_r",
+      "children": [
+        35
+      ]
+    },
+    {
+      "index": 37,
+      "name": "pinky_01_r",
+      "children": [
+        36
+      ]
+    },
+    {
+      "index": 38,
+      "name": "ring_04_leaf_r",
+      "children": []
+    },
+    {
+      "index": 39,
+      "name": "ring_03_r",
+      "children": [
+        38
+      ]
+    },
+    {
+      "index": 40,
+      "name": "ring_02_r",
+      "children": [
+        39
+      ]
+    },
+    {
+      "index": 41,
+      "name": "ring_01_r",
+      "children": [
+        40
+      ]
+    },
+    {
+      "index": 42,
+      "name": "thumb_04_leaf_r",
+      "children": []
+    },
+    {
+      "index": 43,
+      "name": "thumb_03_r",
+      "children": [
+        42
+      ]
+    },
+    {
+      "index": 44,
+      "name": "thumb_02_r",
+      "children": [
+        43
+      ]
+    },
+    {
+      "index": 45,
+      "name": "thumb_01_r",
+      "children": [
+        44
+      ]
+    },
+    {
+      "index": 46,
+      "name": "hand_r",
+      "children": [
+        29,
+        33,
+        37,
+        41,
+        45
+      ]
+    },
+    {
+      "index": 47,
+      "name": "lowerarm_r",
+      "children": [
+        46
+      ]
+    },
+    {
+      "index": 48,
+      "name": "upperarm_r",
+      "children": [
+        47
+      ]
+    },
+    {
+      "index": 49,
+      "name": "clavicle_r",
+      "children": [
+        48
+      ]
+    },
+    {
+      "index": 50,
+      "name": "spine_03",
+      "children": [
+        1,
+        25,
+        49
+      ]
+    },
+    {
+      "index": 51,
+      "name": "spine_02",
+      "children": [
+        50
+      ]
+    },
+    {
+      "index": 52,
+      "name": "spine_01",
+      "children": [
+        51
+      ]
+    },
+    {
+      "index": 53,
+      "name": "ball_leaf_l",
+      "children": []
+    },
+    {
+      "index": 54,
+      "name": "ball_l",
+      "children": [
+        53
+      ]
+    },
+    {
+      "index": 55,
+      "name": "foot_l",
+      "children": [
+        54
+      ]
+    },
+    {
+      "index": 56,
+      "name": "calf_l",
+      "children": [
+        55
+      ]
+    },
+    {
+      "index": 57,
+      "name": "thigh_l",
+      "children": [
+        56
+      ]
+    },
+    {
+      "index": 58,
+      "name": "ball_leaf_r",
+      "children": []
+    },
+    {
+      "index": 59,
+      "name": "ball_r",
+      "children": [
+        58
+      ]
+    },
+    {
+      "index": 60,
+      "name": "foot_r",
+      "children": [
+        59
+      ]
+    },
+    {
+      "index": 61,
+      "name": "calf_r",
+      "children": [
+        60
+      ]
+    },
+    {
+      "index": 62,
+      "name": "thigh_r",
+      "children": [
+        61
+      ]
+    },
+    {
+      "index": 63,
+      "name": "pelvis",
+      "children": [
+        52,
+        57,
+        62
+      ]
+    },
+    {
+      "index": 64,
+      "name": "root",
+      "children": [
+        63
+      ]
+    }
+  ],
+  "key_nodes": [
+    {
+      "index": 0,
+      "name": "Head"
+    },
+    {
+      "index": 1,
+      "name": "neck_01"
+    },
+    {
+      "index": 22,
+      "name": "hand_l"
+    },
+    {
+      "index": 23,
+      "name": "lowerarm_l"
+    },
+    {
+      "index": 24,
+      "name": "upperarm_l"
+    },
+    {
+      "index": 25,
+      "name": "clavicle_l"
+    },
+    {
+      "index": 46,
+      "name": "hand_r"
+    },
+    {
+      "index": 47,
+      "name": "lowerarm_r"
+    },
+    {
+      "index": 48,
+      "name": "upperarm_r"
+    },
+    {
+      "index": 49,
+      "name": "clavicle_r"
+    },
+    {
+      "index": 50,
+      "name": "spine_03"
+    },
+    {
+      "index": 51,
+      "name": "spine_02"
+    },
+    {
+      "index": 52,
+      "name": "spine_01"
+    },
+    {
+      "index": 55,
+      "name": "foot_l"
+    },
+    {
+      "index": 56,
+      "name": "calf_l"
+    },
+    {
+      "index": 57,
+      "name": "thigh_l"
+    },
+    {
+      "index": 60,
+      "name": "foot_r"
+    },
+    {
+      "index": 61,
+      "name": "calf_r"
+    },
+    {
+      "index": 62,
+      "name": "thigh_r"
+    },
+    {
+      "index": 63,
+      "name": "pelvis"
+    },
+    {
+      "index": 64,
+      "name": "root"
+    },
+    {
+      "index": 68,
+      "name": "Armature"
+    }
+  ]
+}
