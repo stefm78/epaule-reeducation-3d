@@ -1,0 +1,14 @@
+class Viewer{
+ constructor(el){this.el=el;this.c=document.createElement('canvas');el.appendChild(this.c);this.x=this.c.getContext('2d');this.yaw=-1.57;this.zoom=1;this.pose={};this.levels=[];this.drag=null;new ResizeObserver(()=>this.resize()).observe(el);this.resize();this.bind()}
+ resize(){let r=this.el.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);this.c.width=r.width*d;this.c.height=r.height*d;this.c.style.width=r.width+'px';this.c.style.height=r.height+'px';this.x.setTransform(d,0,0,d,0,0);this.w=r.width;this.h=r.height}
+ bind(){this.c.onpointerdown=e=>{this.drag=[e.clientX,e.clientY];this.c.setPointerCapture(e.pointerId)};this.c.onpointermove=e=>{if(!this.drag)return;this.yaw+=(e.clientX-this.drag[0])*.008;this.drag=[e.clientX,e.clientY]};this.c.onpointerup=()=>this.drag=null;this.c.onwheel=e=>{e.preventDefault();this.zoom=Math.max(.65,Math.min(1.7,this.zoom*Math.exp(-e.deltaY*.001)))}}
+ base(){return{head:[0,1.18,.35],neck:[0,1,.22],sl:[-.3,.9,.08],sr:[.3,.9,.08],el:[-.36,.52,.42],er:[.36,.52,.42],wl:[-.38,.08,.58],wr:[.38,.08,.58],hl:[-.22,.62,-.42],hr:[.22,.62,-.42],kl:[-.22,.08,-.42],kr:[.22,.08,-.42],al:[-.22,.04,-.82],ar:[.22,.04,-.82]}}
+ poseFor(ex,t){let p=this.base(),q=(1-Math.cos(t*Math.PI*2))/2,m=ex.motion;if(m==='push'){p.head[1]-=.32*q;p.neck[1]-=.3*q;p.sl[1]-=.3*q;p.sr[1]-=.3*q;p.el[1]-=.22*q;p.er[1]-=.22*q}else if(m==='shift'){let a=Math.sin(t*Math.PI*2)*.18;for(let k of ['head','neck','sl','sr','hl','hr'])p[k][0]+=a}else if(m==='supine'){p.head=[0,.22,.8];p.neck=[0,.2,.55];p.sl=[-.3,.22,.3];p.sr=[.3,.22,.3];p.el=[-.85,.28,.22];p.er=[.85,.28,.22];let y=.3+.5*q,z=.22+.28*(1-q);p.wl=[-.85,y,z];p.wr=[.85,y,z];p.hl=[-.22,.16,-.45];p.hr=[.22,.16,-.45];p.kl=[-.22,.16,-1];p.kr=[.22,.16,-1];p.al=[-.22,.08,-1.45];p.ar=[.22,.08,-1.45]}
+ else if(m==='dive'){let s=t<.5?t*2:(1-t)*2;p.head[1]=.78-.6*s;p.head[2]=.35+.55*s;p.neck[1]=.7-.5*s;p.neck[2]=.2+.45*s;p.sl[1]=.65-.42*s;p.sr[1]=.65-.42*s;p.sl[2]=.05+.4*s;p.sr[2]=.05+.4*s;p.hl[2]=-.55+.38*s;p.hr[2]=-.55+.38*s}
+ else if(m==='row'){p.el=[-.42,.34,.25];p.wl=[-.42,.1,.22];if(q<.5){let a=q*2;p.el=[-.42,.34+.45*a,.25-.25*a];p.wl=[-.42,.1+.45*a,.22-.1*a]}else{let a=(q-.5)*2;p.el=[-.42,.79,0];p.wl=[-.42,.55+.18*a,.12-.72*a]}}
+ else if(m==='rotate'){p.el=[-.82,.82,.22];p.wl=[-.82,.25+.7*q,.25]}
+ else if(m==='reach'){p.el=[-.35+.08*q,.5+.28*q,.42+.55*q];p.wl=[-.38+.13*q,.08+.72*q,.58+.85*q]};return p}
+ proj(v){let cy=Math.cos(this.yaw),sy=Math.sin(this.yaw),x=v[0]*cy-v[2]*sy,z=v[0]*sy+v[2]*cy,y=v[1]-.45,d=4-z,s=Math.min(this.w,this.h)*1.25*this.zoom;return[this.w/2+x*s/d,this.h*.58-y*s/d,s/d]}
+ line(a,b,w,c){let A=this.proj(a),B=this.proj(b),x=this.x;x.strokeStyle=c;x.lineWidth=Math.max(2,w*(A[2]+B[2])/2);x.lineCap='round';x.beginPath();x.moveTo(A[0],A[1]);x.lineTo(B[0],B[1]);x.stroke()}
+ dot(v,r,c,a=1){let P=this.proj(v),x=this.x;x.globalAlpha=a;x.fillStyle=c;x.beginPath();x.arc(P[0],P[1],Math.max(3,r*P[2]),0,7);x.fill();x.globalAlpha=1}
+}
