@@ -1,0 +1,62 @@
+name: Poly static probe
+
+on:
+  push:
+    branches: [agent/human-v2-asset-lab]
+    paths: [.github/workflows/poly-static-probe.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/human-v2-asset-lab
+      - name: Inspect page source and network endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/poly-static
+          curl -fsSL --compressed 'https://poly.pizza/m/c3Ibh9I3udk' -o research/poly-static/page.html
+          grep -Eo 'https?[^"<> ]+' research/poly-static/page.html | sort -u > research/poly-static/urls.txt || true
+          grep -Eio '.{0,140}(c3Ibh9I3udk|download|gltf|glb|firebase|storage).{0,220}' research/poly-static/page.html > research/poly-static/matches.txt || true
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          import json,re,urllib.request
+          text=Path('research/poly-static/page.html').read_text(errors='replace')
+          class P(HTMLParser):
+            def __init__(self):super().__init__();self.s=[]
+            def handle_starttag(self,t,a):
+              if t=='script':
+                src=dict(a).get('src')
+                if src:self.s.append(src)
+          p=P();p.feed(text)
+          Path('research/poly-static/scripts.txt').write_text('\n'.join(p.s)+'\n')
+          base='https://poly.pizza'
+          out=[]
+          for src in p.s:
+            url=src if src.startswith('http') else base+src
+            try:
+              data=urllib.request.urlopen(url,timeout=30).read().decode('utf-8','replace')
+            except Exception as e:
+              out.append({'url':url,'error':repr(e)});continue
+            hits=[]
+            for pat in ['download','model-download','firebase','storage','gltf','glb','api/']:
+              for m in re.finditer(pat,data,re.I):
+                hits.append(data[max(0,m.start()-180):m.start()+300])
+                if len(hits)>=20:break
+              if len(hits)>=20:break
+            if hits:out.append({'url':url,'hits':hits})
+          Path('research/poly-static/script-hits.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit evidence
+        run: |
+          git config user.name 'epaule-3d-asset-lab'
+          git config user.email '104558808+stefm78@users.noreply.github.com'
+          git add research/poly-static
+          git commit -m 'chore: inspect Poly Pizza download endpoints'
+          git push origin HEAD:agent/human-v2-asset-lab
