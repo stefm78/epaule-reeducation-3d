@@ -22,10 +22,10 @@ const desktopContext = await browser.newContext({ viewport: { width: 1440, heigh
 const page = await openPage(desktopContext, 'desktop');
 const exercises = page.locator('.exercise');
 report.desktop.exerciseCount = await exercises.count();
-if (report.desktop.exerciseCount !== 7) throw new Error(`Expected 7 exercises, got ${report.desktop.exerciseCount}`);
+if (report.desktop.exerciseCount !== 8) throw new Error(`Expected 8 exercises, got ${report.desktop.exerciseCount}`);
 
-const slugs = ['clap','shift','supine','dive','row','rotate','reach'];
-for (let i = 0; i < 7; i++) {
+const slugs = ['clap','shift','supine','airplane','dive','row','rotate','reach'];
+for (let i = 0; i < 8; i++) {
   await exercises.nth(i).click();
   await page.locator('#timeline').evaluate((el) => { el.value = '500'; el.dispatchEvent(new Event('input', { bubbles: true })); });
   await page.waitForTimeout(250);
@@ -34,7 +34,7 @@ for (let i = 0; i < 7; i++) {
   await page.locator('#viewer').screenshot({ path: `${out}/desktop-${i + 1}-${slugs[i]}.png` });
 }
 
-await exercises.nth(3).click();
+await exercises.nth(4).click();
 for (const [label, value] of [['back',40],['lower',250],['forward',520],['up',750],['return',930]]) {
   await page.locator('#timeline').evaluate((el, v) => { el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); }, value);
   await page.waitForTimeout(220);
@@ -58,7 +58,7 @@ await desktopContext.close();
 
 const mobileContext = await browser.newContext({ ...devices['Pixel 7'], serviceWorkers: 'allow' });
 const mobile = await openPage(mobileContext, 'mobile');
-await mobile.locator('.exercise').nth(3).click();
+await mobile.locator('.exercise').nth(4).click();
 await mobile.locator('#timeline').evaluate((el) => { el.value = '520'; el.dispatchEvent(new Event('input', { bubbles: true })); });
 await mobile.waitForTimeout(300);
 await mobile.screenshot({ path: `${out}/mobile-dive-full.png`, fullPage: true });
