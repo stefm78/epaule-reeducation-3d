@@ -1,0 +1,133 @@
+Archive:  /tmp/quaternius/standard.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+        0  2025-12-02 16:07   Universal Base Characters[Standard]/
+        0  2025-12-02 16:02   Universal Base Characters[Standard]/Base Characters/
+        0  2025-12-02 16:02   Universal Base Characters[Standard]/Base Characters/Godot - UE/
+   990808  2025-12-16 12:32   Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Female_FullBody.bin
+    31656  2025-12-16 12:32   Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Female_FullBody.gltf
+   720076  2025-11-14 20:31   Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.bin
+    30989  2025-11-14 20:31   Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.gltf
+    35958  2025-08-18 17:55   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Eye_Brown.png
+    15099  2025-08-18 17:55   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Eye_Normal.png
+  1570376  2025-08-18 17:55   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Hair_1_BaseColor.png
+  1570376  2025-08-18 13:22   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Hair_1_BaseColor_png.png
+  4326126  2025-08-18 17:55   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Hair_1_Normal.png
+  1729467  2025-08-18 16:13   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Hair_2_BaseColor.png
+  1729467  2025-08-18 13:21   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Hair_2_BaseColor_png.png
+  4710013  2025-08-18 16:13   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Hair_2_Normal.png
+  1319410  2025-08-18 16:13   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Female_Dark_BaseColor.png
+  3940537  2025-08-18 16:13   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Female_Normal.png
+  3277022  2025-08-18 16:13   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Female_Roughness.png
+  1384380  2025-08-18 17:55   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Male_Dark.png
+  4252937  2025-08-18 17:55   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Male_Normal.png
+  3152049  2025-08-18 17:55   Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Male_Roughness.png
+        0  2025-08-18 14:39   Universal Base Characters[Standard]/Base Characters/Textures/
+        0  2025-08-18 14:39   Universal Base Characters[Standard]/Base Characters/Textures/Normals Unity - Godot/
+    15099  2025-08-16 14:41   Universal Base Characters[Standard]/Base Characters/Textures/Normals Unity - Godot/T_Eye_Normal.png
+  4326126  2025-08-16 14:41   Universal Base Characters[Standard]/Base Characters/Textures/Normals Unity - Godot/T_Hair_1_Normal.png
+  4710013  2025-08-17 14:31   Universal Base Characters[Standard]/Base Characters/Textures/Normals Unity - Godot/T_Hair_2_Normal.png
+  3940537  2025-08-17 17:55   Universal Base Characters[Standard]/Base Characters/Textures/Normals Unity - Godot/T_Superhero_Female_Normal.png
+  4252937  2025-08-16 14:38   Universal Base Characters[Standard]/Base Characters/Textures/Normals Unity - Godot/T_Superhero_Male_Normal.png
+    35958  2025-08-15 01:10   Universal Base Characters[Standard]/Base Characters/Textures/T_Eye_Brown.png
+    15097  2025-08-15 01:10   Universal Base Characters[Standard]/Base Characters/Textures/T_Eye_Normal.png
+  1570376  2025-08-15 18:02   Universal Base Characters[Standard]/Base Characters/Textures/T_Hair_1_BaseColor.png
+  3770683  2025-08-15 18:02   Universal Base Characters[Standard]/Base Characters/Textures/T_Hair_1_Normal.png
+  1729467  2025-08-15 16:23   Universal Base Characters[Standard]/Base Characters/Textures/T_Hair_2_BaseColor.png
+  4109628  2025-08-15 16:23   Universal Base Characters[Standard]/Base Characters/Textures/T_Hair_2_Normal.png
+  1319410  2025-08-14 20:55   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Female_Dark_BaseColor.png
+  1317541  2025-08-14 20:57   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Female_Light_BaseColor.png
+  3420584  2025-08-14 20:57   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Female_Normal.png
+  1997719  2025-08-14 20:57   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Female_Roughness.png
+  1384380  2025-08-14 19:10   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Male_Dark.png
+  1389170  2025-08-14 19:11   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Male_Ligh.png
+  3687166  2025-08-14 19:11   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Male_Normal.png
+  1912686  2025-08-14 19:11   Universal Base Characters[Standard]/Base Characters/Textures/T_Superhero_Male_Roughness.png
+        0  2025-12-02 16:02   Universal Base Characters[Standard]/Base Characters/Unity/
+  1006508  2025-11-14 22:36   Universal Base Characters[Standard]/Base Characters/Unity/Superhero_Female_FullBody.fbx
+   826876  2025-11-14 20:31   Universal Base Characters[Standard]/Base Characters/Unity/Superhero_Male_FullBody.fbx
+      289  2025-08-18 14:29   Universal Base Characters[Standard]/Base Characters/Unreal-Engine-README.txt
+        0  2025-12-02 16:03   Universal Base Characters[Standard]/Hairstyles/
+        0  2025-08-18 14:33   Universal Base Characters[Standard]/Hairstyles/Origin at 0/
+        0  2025-08-18 14:47   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/
+    73596  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Eyebrows_Female.fbx
+    47132  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Eyebrows_Regular.fbx
+    48444  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Hair_Beard.fbx
+   135388  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Hair_Buns.fbx
+    45036  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Hair_Buzzed.fbx
+    43004  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Hair_BuzzedFemale.fbx
+   125036  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Hair_Long.fbx
+    62668  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unity)/Hair_SimpleParted.fbx
+        0  2025-08-18 14:48   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/
+    73548  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Eyebrows_Female.fbx
+    47276  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Eyebrows_Regular.fbx
+    48540  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Hair_Beard.fbx
+   134476  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Hair_Buns.fbx
+    44716  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Hair_Buzzed.fbx
+    43036  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Hair_BuzzedFemale.fbx
+   123612  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Hair_Long.fbx
+    61932  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/FBX (Unreal Engine)/Hair_SimpleParted.fbx
+        0  2025-08-18 14:50   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/
+    67248  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Eyebrows_Female.bin
+     2855  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Eyebrows_Female.gltf
+    26576  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Eyebrows_Regular.bin
+     2018  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Eyebrows_Regular.gltf
+    25276  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Beard.bin
+     2005  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Beard.gltf
+   131768  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Buns.bin
+     2243  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Buns.gltf
+    19892  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Buzzed.bin
+     2006  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Buzzed.gltf
+    19892  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_BuzzedFemale.bin
+     2191  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_BuzzedFemale.gltf
+   115996  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Long.bin
+     2056  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_Long.gltf
+    32032  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_SimpleParted.bin
+     2010  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/Hair_SimpleParted.gltf
+  1570376  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/T_Hair_1_BaseColor.png
+  4326126  2025-08-18 12:51   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/T_Hair_1_Normal.png
+  1729467  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/T_Hair_2_BaseColor.png
+  4710013  2025-08-18 12:43   Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/T_Hair_2_Normal.png
+        0  2025-12-02 16:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/
+        0  2025-12-02 16:04   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/
+   194428  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Eyebrows_Female.fbx
+   168636  2025-11-14 21:10   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Eyebrows_Regular.fbx
+   169804  2025-11-14 21:10   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Hair_Beard.fbx
+   259420  2025-11-14 21:05   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Hair_Buns.fbx
+   165884  2025-11-14 21:11   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Hair_Buzzed.fbx
+   164492  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Hair_BuzzedFemale.fbx
+   249404  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Hair_Long.fbx
+   181628  2025-11-14 21:11   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/FBX (Unity)/Hair_SimpleParted.fbx
+        0  2025-12-02 16:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/
+   100592  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Eyebrows_Female.bin
+    25053  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Eyebrows_Female.gltf
+    43656  2025-11-14 21:10   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Eyebrows_Regular.bin
+    23117  2025-11-14 21:10   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Eyebrows_Regular.gltf
+    41356  2025-11-14 21:10   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Beard.bin
+    23104  2025-11-14 21:10   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Beard.gltf
+   205916  2025-11-14 21:05   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Buns.bin
+    23807  2025-11-14 21:05   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Buns.gltf
+    33372  2025-11-14 21:11   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Buzzed.bin
+    23108  2025-11-14 21:11   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Buzzed.gltf
+    33372  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_BuzzedFemale.bin
+    23779  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_BuzzedFemale.gltf
+   181756  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Long.bin
+    23813  2025-11-14 21:06   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Long.gltf
+    51332  2025-11-14 21:11   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_SimpleParted.bin
+    23114  2025-11-14 21:11   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_SimpleParted.gltf
+  1570376  2025-08-18 12:56   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/T_Hair_1_BaseColor.png
+  4326126  2025-08-18 12:56   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/T_Hair_1_Normal.png
+  1729467  2025-08-18 12:48   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/T_Hair_2_BaseColor.png
+  4710013  2025-08-18 12:48   Universal Base Characters[Standard]/Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/T_Hair_2_Normal.png
+        0  2025-08-18 14:33   Universal Base Characters[Standard]/Hairstyles/Textures/
+        0  2025-08-18 14:33   Universal Base Characters[Standard]/Hairstyles/Textures/Normals Unity - Godot/
+  4326126  2025-08-16 14:41   Universal Base Characters[Standard]/Hairstyles/Textures/Normals Unity - Godot/T_Hair_1_Normal.png
+  4710013  2025-08-17 14:31   Universal Base Characters[Standard]/Hairstyles/Textures/Normals Unity - Godot/T_Hair_2_Normal.png
+  1570376  2025-08-15 18:02   Universal Base Characters[Standard]/Hairstyles/Textures/T_Hair_1_BaseColor.png
+  3770683  2025-08-15 18:02   Universal Base Characters[Standard]/Hairstyles/Textures/T_Hair_1_Normal.png
+  1729467  2025-08-15 16:23   Universal Base Characters[Standard]/Hairstyles/Textures/T_Hair_2_BaseColor.png
+  4109628  2025-08-15 16:23   Universal Base Characters[Standard]/Hairstyles/Textures/T_Hair_2_Normal.png
+      806  2025-08-18 14:33   Universal Base Characters[Standard]/License_Standard.txt
+  2109533  2025-08-21 02:45   Universal Base Characters[Standard]/Preview.png
+---------                     -------
+132571039                     128 files
