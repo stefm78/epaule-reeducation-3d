@@ -1,0 +1,15 @@
+{
+  "blender": "4.0.2",
+  "actions": [
+    "Pompe_plongeante"
+  ],
+  "objects": 59,
+  "muscles": [
+    "Deltoïde gauche",
+    "Pectoral gauche",
+    "Triceps gauche",
+    "Coiffe gauche",
+    "Dentelé gauche",
+    "Trapèze inférieur"
+  ]
+}
