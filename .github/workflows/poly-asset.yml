@@ -14,7 +14,7 @@ permissions:
 jobs:
   acquire:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,71 +26,90 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check playwright
           python -m playwright install --with-deps chromium
-      - name: Download CC0 animated human
+      - name: Probe and acquire CC0 animated human
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf research/poly assets/human
           mkdir -p research/poly assets/human
           cat > /tmp/poly.py <<'PY'
           from pathlib import Path
           from playwright.sync_api import sync_playwright
-          import json, traceback
+          import json, traceback, zipfile
 
           report=[]
+          downloaded=[]
           target=Path('assets/human/animated-human.glb')
+
+          def save_download(d):
+              try:
+                  tmp=Path('/tmp')/(d.suggested_filename or f'human-{len(downloaded)}')
+                  d.save_as(str(tmp))
+                  downloaded.append(tmp)
+                  report.append({'stage':'download-event','name':tmp.name,'bytes':tmp.stat().st_size,'url':d.url})
+              except Exception as exc:
+                  report.append({'stage':'download-save-error','error':repr(exc)})
+
           with sync_playwright() as pw:
               browser=pw.chromium.launch(headless=True)
               ctx=browser.new_context(accept_downloads=True, viewport={'width':1280,'height':900})
               page=ctx.new_page()
-              page.on('response', lambda r: report.append({'response':r.status,'url':r.url}) if any(x in r.url.lower() for x in ['.glb','.gltf','.zip','download','storage','firebase']) else None)
+              page.on('download', save_download)
+              page.on('request', lambda r: report.append({'request':r.method,'url':r.url}) if any(x in r.url.lower() for x in ['.glb','.gltf','.zip','download','storage','firebase','model']) else None)
+              page.on('response', lambda r: report.append({'response':r.status,'url':r.url}) if any(x in r.url.lower() for x in ['.glb','.gltf','.zip','download','storage','firebase','model']) else None)
               try:
                   page.goto('https://poly.pizza/m/c3Ibh9I3udk', wait_until='networkidle', timeout=120000)
                   page.screenshot(path='research/poly/01-model.png', full_page=True)
-                  report.append({'stage':'model','url':page.url,'body':page.locator('body').inner_text()[:12000]})
+                  report.append({'stage':'model','url':page.url,'body':page.locator('body').inner_text()[:14000]})
                   buttons=page.get_by_text('Download', exact=True)
                   if not buttons.count(): buttons=page.get_by_text('Download', exact=False)
-                  buttons.first.click()
-                  page.wait_for_timeout(2500)
+                  report.append({'stage':'download-buttons','count':buttons.count()})
+                  if buttons.count(): buttons.first.click()
+                  page.wait_for_timeout(3500)
                   page.screenshot(path='research/poly/02-after-download.png', full_page=True)
-                  report.append({'stage':'after-click','url':page.url,'body':page.locator('body').inner_text()[:12000]})
-                  choices=page.get_by_text('GLTF', exact=False)
-                  if choices.count():
-                      with page.expect_download(timeout=120000) as info:
-                          choices.first.click()
-                      d=info.value
-                  else:
-                      with page.expect_download(timeout=120000) as info:
-                          page.get_by_text('Download', exact=False).last.click()
-                      d=info.value
-                  tmp=Path('/tmp')/(d.suggested_filename or 'human-download')
-                  d.save_as(str(tmp))
-                  report.append({'stage':'download','name':tmp.name,'bytes':tmp.stat().st_size})
-                  if tmp.suffix.lower()=='.glb':
-                      target.write_bytes(tmp.read_bytes())
-                  elif tmp.suffix.lower()=='.zip':
-                      import zipfile
-                      with zipfile.ZipFile(tmp) as z:
-                          names=[n for n in z.namelist() if n.lower().endswith('.glb')]
-                          if names: target.write_bytes(z.read(names[0]))
-                          else:
-                              z.extractall('assets/human/source')
-                  else:
-                      target.with_suffix(tmp.suffix).write_bytes(tmp.read_bytes())
+                  report.append({'stage':'after-click','url':page.url,'body':page.locator('body').inner_text()[:14000]})
+                  for label in ['GLTF','glTF','Download GLTF','Download']:
+                      choices=page.get_by_text(label, exact=False)
+                      report.append({'stage':'choice','label':label,'count':choices.count()})
+                      if choices.count():
+                          try:
+                              choices.last.click(timeout=10000)
+                              page.wait_for_timeout(6000)
+                          except Exception as exc:
+                              report.append({'stage':'choice-error','label':label,'error':repr(exc)})
+                          if downloaded: break
+                  page.screenshot(path='research/poly/03-final.png', full_page=True)
               except Exception as exc:
                   report.append({'stage':'error','error':repr(exc),'traceback':traceback.format_exc(),'url':page.url})
                   try: page.screenshot(path='research/poly/99-error.png', full_page=True)
                   except Exception: pass
               finally:
                   browser.close()
+
+          for tmp in downloaded:
+              suffix=tmp.suffix.lower()
+              if suffix=='.glb':
+                  target.write_bytes(tmp.read_bytes());break
+              if suffix=='.zip':
+                  try:
+                      with zipfile.ZipFile(tmp) as z:
+                          names=[n for n in z.namelist() if n.lower().endswith('.glb')]
+                          if names:
+                              target.write_bytes(z.read(names[0]));break
+                          z.extractall('assets/human/source')
+                  except Exception as exc:
+                      report.append({'stage':'zip-error','name':tmp.name,'error':repr(exc)})
+              elif suffix in ['.gltf','.fbx','.obj']:
+                  (Path('assets/human')/tmp.name).write_bytes(tmp.read_bytes())
           Path('research/poly/report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
           PY
           python /tmp/poly.py
           find assets/human -type f -printf '%P\t%s bytes\n' | sort > research/poly/inventory.txt
-      - name: Commit acquired asset and evidence
+      - name: Commit asset and evidence
         run: |
           git config user.name 'epaule-3d-asset-lab'
           git config user.email '104558808+stefm78@users.noreply.github.com'
           git add assets/human research/poly
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'feat: acquire CC0 rigged human asset'
+          git commit -m 'feat: acquire or probe CC0 rigged human asset'
           git push origin HEAD:agent/human-v2-asset-lab
