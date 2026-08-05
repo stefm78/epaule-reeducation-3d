@@ -15,6 +15,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p=Path('src/app-v4.js');s=p.read_text()
           changes={
           "[['shoulder',0xe93c2d,.16],['arm',0xe93c2d,.13],['chest',0xf18a34,.15],['scapula',0xf2c54e,.14]]":"[['shoulder',0xe93c2d,.11],['arm',0xe93c2d,.09],['chest',0xf18a34,.11],['scapula',0xf2c54e,.10]]",
@@ -23,7 +24,6 @@ jobs:
           "const kl=V(hl.x,.055,.48),kr=V(hr.x,.055,.48),fl=V(hl.x,.08,.02),fr=V(hr.x,.08,.02);":"const kl=V(hl.x,.045,.82),kr=V(hr.x,.045,.82),fl=V(hl.x,.055,.30),fr=V(hr.x,.055,.30);",
           "=e.dose}renderInfo();":"=e.dose;frameCurrent()}",
           "controls.maxDistance=7;":"controls.maxDistance=8;renderInfo();",
-          "$('#resetView').onclick=()=>{camera.position.set(5.0,2.4,.5);controls.target.set(0,.62,.25)};":"$('#resetView').onclick=frameCurrent;",
           "controls.target.set(0,.65,-.65)":"controls.target.set(0,.62,EX[current].id==='supine'?-.8:.8)"
           }
           for old,new in changes.items():
@@ -33,6 +33,8 @@ jobs:
           frame="function frameCurrent(){const isSupine=EX[current].id==='supine';camera.position.set(5.0,2.35,isSupine?-.45:.8);controls.target.set(0,.58,isSupine?-.78:.82);controls.update()}\n\n"
           if anchor not in s: raise SystemExit('MISSING_HOST_ANCHOR')
           s=s.replace(anchor,frame+anchor,1)
+          s,n=re.subn(r"\$\('#resetView'\)\.onclick=.*?;","$('#resetView').onclick=frameCurrent;",s,count=1)
+          if n!=1: raise SystemExit('MISSING_RESET_HANDLER')
           old="if(left){aim('upperarm_l','lowerarm_l',left.elbow);aim('lowerarm_l','hand_l',left.wrist)}else{aim('upperarm_l','lowerarm_l',elbowL);aim('lowerarm_l','hand_l',handL)}aim('upperarm_r','lowerarm_r',elbowR);aim('lowerarm_r','hand_r',handR);if(knees){"
           new="if(left){aim('upperarm_l','lowerarm_l',left.elbow);aim('lowerarm_l','hand_l',left.wrist)}else{aim('upperarm_l','lowerarm_l',elbowL);aim('lowerarm_l','hand_l',handL);aim('hand_l','middle_01_l',handL.clone().add(V(0,0,.22)))}aim('upperarm_r','lowerarm_r',elbowR);aim('lowerarm_r','hand_r',handR);aim('hand_r','middle_01_r',handR.clone().add(V(0,0,.22)));if(knees){"
           if old not in s: raise SystemExit('MISSING_HAND_CHAIN')
