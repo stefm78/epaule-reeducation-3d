@@ -1,4 +1,4 @@
-name: V4 movement accuracy correction
+name: V4 final range correction
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -11,20 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {ref: agent/human-v4-quaternius}
-      - name: Preserve knee support and show the hand clap
+      - name: Keep dive translation within kneeling reach
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('src/app-v4.js');s=p.read_text()
           changes={
-          "else if(id==='airplane'){camera.position.set(3.2,2.25,-3.2);controls.target.set(0,.62,.72)}":"else if(id==='airplane'){camera.position.set(1.5,2.45,-5.2);controls.target.set(0,.58,.68)}",
-          "function support({y=.72,z=0,x=0,bend=.08,left=null,knees=true,handLift=0})":"function support({y=.72,z=0,x=0,bend=.08,left=null,knees=true,handLift=0,handX=.27})",
-          "const handL=V(.27,.025+handLift,1.66),handR=V(-.27,.025+handLift,1.66);":"const handL=V(handX,.025+handLift,1.66),handR=V(-handX,.025+handLift,1.66);",
-          "let y=.74,b=.08,h=0;":"let y=.74,b=.08,h=0,hx=.27;",
-          "h=.14*a":"h=.14*a;hx=.27-.20*a",
-          "h=.14*(1-a)":"h=.14*(1-a);hx=.07+.20*a",
-          "support({y,bend:b,handLift:h})":"support({y,bend:b,handLift:h,handX:hx})",
-          "if(u<.15){const a=u/.15;y=.82;z=.30-.15*a;b=.08}else if(u<.30){const a=(u-.15)/.15;y=.82-.52*a;z=.15;b=.08+.78*a}else if(u<.55){const a=(u-.30)/.25;y=.30;z=.15+.83*a;b=.86}else if(u<.75){const a=(u-.55)/.20;y=.30+.48*a;z=.98;b=.86*(1-a)}else{const a=(u-.75)/.25;y=.78+.04*a;z=.98-.68*a;b=.06}":"if(u<.15){const a=u/.15;y=.72;z=.05-.05*a;b=.08}else if(u<.32){const a=(u-.15)/.17;y=.72-.27*a;z=.00+.16*a;b=.08+.70*a}else if(u<.58){const a=(u-.32)/.26;y=.45;z=.16+.62*a;b=.78}else if(u<.78){const a=(u-.58)/.20;y=.45+.27*a;z=.78;b=.78*(1-a)}else{const a=(u-.78)/.22;y=.72;z=.78-.73*a;b=.08}"
+          "camera.position.set(1.5,2.45,-5.2)":"camera.position.set(1.2,2.25,-4.25)",
+          "z=.16+.62*a":"z=.16+.34*a",
+          "z=.78;b=.78*(1-a)":"z=.50;b=.78*(1-a)",
+          "z=.78-.73*a":"z=.50-.45*a"
           }
           for old,new in changes.items():
               if old not in s: raise SystemExit('MISSING_PATTERN: '+old)
@@ -34,5 +30,5 @@ jobs:
           git config user.name epaule-v4-correction
           git config user.email 104558808+stefm78@users.noreply.github.com
           git add src/app-v4.js
-          git commit -m 'fix: keep dive on knees and animate the clap'
+          git commit -m 'fix: preserve knee contact through dive translation'
           git push origin HEAD:agent/human-v4-quaternius
