@@ -6,13 +6,17 @@ OUT = Path(os.environ.get('OUT_DIR','dist'))
 OUT.mkdir(parents=True, exist_ok=True)
 (OUT/'qa').mkdir(exist_ok=True)
 
+# ---------- scene ----------
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene=bpy.context.scene
-scene.render.engine='BLENDER_EEVEE_NEXT' if bpy.app.version >= (4,2,0) else 'BLENDER_EEVEE'
+scene.render.engine='BLENDER_EEVEE_NEXT' if hasattr(scene,'eevee') or bpy.app.version >= (4,2,0) else 'BLENDER_EEVEE'
 scene.render.resolution_x=1000; scene.render.resolution_y=1000; scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG'
+if scene.world is None:
+    scene.world=bpy.data.worlds.new('World')
 scene.world.color=(0.035,0.045,0.055)
 
+# ---------- materials ----------
 def mat(name, color, metallic=0, rough=.55, alpha=1):
     m=bpy.data.materials.new(name); m.diffuse_color=(*color,alpha); m.use_nodes=True
     bs=m.node_tree.nodes.get('Principled BSDF')
@@ -32,6 +36,7 @@ MUSCLE_SECONDARY=mat('Muscle secondaire',(1.0,0.35,0.035),0,.42,.76)
 MUSCLE_STABILIZER=mat('Muscle stabilisateur',(0.98,0.68,0.08),0,.48,.70)
 FLOOR=mat('Sol',(0.08,0.11,0.13),0,.78)
 
+# ---------- geometry ----------
 def smooth(obj):
     if obj.type=='MESH':
         for p in obj.data.polygons:p.use_smooth=True
@@ -59,6 +64,7 @@ def capsule(name,a,b,r,material,taper=1.0):
 def parent_keep(obj, arm, bone):
     mw=obj.matrix_world.copy();obj.parent=arm;obj.parent_type='BONE';obj.parent_bone=bone;obj.matrix_world=mw
 
+# ---------- armature ----------
 rest={
 'pelvis':((0,0,1.00),(0,0,1.18),None),'spine':((0,0,1.18),(0,0,1.42),'pelvis'),'chest':((0,0,1.42),(0,0,1.62),'spine'),'neck':((0,0,1.62),(0,0,1.76),'chest'),'head':((0,0,1.76),(0,0,1.98),'neck'),
 'clavicle.L':((0,0,1.57),(.25,0,1.58),'chest'),'upper_arm.L':((.25,0,1.58),(.57,0,1.48),'clavicle.L'),'forearm.L':((.57,0,1.48),(.84,0,1.32),'upper_arm.L'),'hand.L':((.84,0,1.32),(1.00,-.015,1.25),'forearm.L'),
@@ -74,6 +80,7 @@ bpy.ops.object.mode_set(mode='POSE')
 for pb in arm.pose.bones:pb.rotation_mode='QUATERNION'
 bpy.ops.object.mode_set(mode='OBJECT')
 
+# ---------- body ----------
 parts=[]
 parts += [(uv('Thorax',(0,0,1.47),(.32,.20,.30),SKIN_LIGHT),'chest'),(uv('Abdomen',(0,.005,1.23),(.245,.17,.25),SKIN),'spine'),(uv('Bassin',(0,.005,1.01),(.29,.21,.21),SHORTS),'pelvis')]
 parts += [(uv('Crâne',(0,0,1.91),(.16,.145,.20),SKIN_LIGHT),'head'),(uv('Mâchoire',(0,-.025,1.80),(.125,.115,.11),SKIN_LIGHT),'head'),(uv('Oreille.L',(.155,0,1.88),(.025,.018,.055),SKIN),'head'),(uv('Oreille.R',(-.155,0,1.88),(.025,.018,.055),SKIN),'head')]
@@ -94,6 +101,7 @@ for side,s in [('L',1),('R',-1)]:
     parts.append((cube_round(f'Pied.{side}',foot,(.09,.18,.06),SKIN,.045),f'foot.{side}'))
 for obj,bone in parts: parent_keep(obj,arm,bone)
 
+# ---------- muscle overlays ----------
 muscles=[]
 def muscle(name,loc,scale,bone,level):
     m={3:MUSCLE_PRIMARY,2:MUSCLE_SECONDARY,1:MUSCLE_STABILIZER}[level]
@@ -105,6 +113,7 @@ muscle('Coiffe gauche',(.24,.09,1.58),(.10,.035,.10),'clavicle.L',2)
 muscle('Dentelé gauche',(.22,-.15,1.34),(.075,.035,.16),'chest',2)
 muscle('Trapèze inférieur',(0,.17,1.40),(.14,.035,.20),'chest',1)
 
+# ---------- exercise poses ----------
 def quadruped():
     return {'pelvis':(0,.42,.70),'spine':(0,.22,.73),'chest':(0,-.08,.71),'neck':(0,-.28,.73),'head':(0,-.43,.77),'lShoulder':(.27,-.10,.70),'rShoulder':(-.27,-.10,.70),'lElbow':(.31,-.12,.39),'rElbow':(-.31,-.12,.39),'lWrist':(.31,-.30,.08),'rWrist':(-.31,-.30,.08),'lHand':(.31,-.41,.06),'rHand':(-.31,-.41,.06),'lHip':(.15,.42,.68),'rHip':(-.15,.42,.68),'lKnee':(.18,.62,.10),'rKnee':(-.18,.62,.10),'lAnkle':(.18,.79,.08),'rAnkle':(-.18,.79,.08),'lToe':(.18,.93,.06),'rToe':(-.18,.93,.06)}
 def copy(p):return {k:tuple(v) for k,v in p.items()}
@@ -130,6 +139,7 @@ scene.frame_start=1;scene.frame_end=120;scene.render.fps=24
 for fc in act.fcurves:
     for kp in fc.keyframe_points:kp.interpolation='BEZIER'
 
+# ---------- stage ----------
 bpy.ops.mesh.primitive_plane_add(size=8,location=(0,0,0));floor=bpy.context.object;floor.name='Sol';floor.data.materials.append(FLOOR)
 bpy.ops.object.light_add(type='AREA',location=(3,-4,5));key=bpy.context.object;key.data.energy=1000;key.data.shape='DISK';key.data.size=5
 bpy.ops.object.light_add(type='AREA',location=(-3,-1,3));fill=bpy.context.object;fill.data.energy=650;fill.data.size=4
@@ -137,6 +147,8 @@ bpy.ops.object.light_add(type='AREA',location=(0,4,4));rim=bpy.context.object;ri
 bpy.ops.object.camera_add(location=(3.3,-4.2,2.2));cam=bpy.context.object;scene.camera=cam
 def track(obj,pt):obj.rotation_euler=(Vector(pt)-obj.location).to_track_quat('-Z','Y').to_euler()
 track(cam,(0,0,.85));cam.data.lens=58
+
+# ---------- evidence + export ----------
 for frame,name in [(1,'dive-01-back'),(30,'dive-02-low'),(56,'dive-03-front'),(78,'dive-04-up')]:
     scene.frame_set(frame);scene.render.filepath=str(OUT/'qa'/f'{name}.png');bpy.ops.render.render(write_still=True)
 scene.frame_set(1)
