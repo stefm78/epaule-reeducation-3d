@@ -1,0 +1,45 @@
+name: Blender human prototype
+on:
+  push:
+    branches: [agent/human-v3-blender-lab]
+    paths:
+      - tools/build_human.py
+      - .github/workflows/blender-human.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/human-v3-blender-lab
+      - name: Install Blender
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y blender
+          blender --version
+      - name: Generate rig, animation and QA renders
+        run: |
+          rm -rf dist
+          OUT_DIR=dist blender -b --python tools/build_human.py
+          test -s dist/kinesio-human.glb
+          ls -lh dist dist/qa
+      - name: Commit candidate evidence
+        run: |
+          mkdir -p assets/human qa/blender
+          cp dist/kinesio-human.glb assets/human/kinesio-human.glb
+          cp dist/model-report.json assets/human/model-report.json
+          cp dist/qa/*.png qa/blender/
+          git config user.name 'epaule-3d-blender-lab'
+          git config user.email '104558808+stefm78@users.noreply.github.com'
+          git add assets/human qa/blender
+          git commit -m 'feat: generate rigged kinesio human vertical prototype'
+          git push origin HEAD:agent/human-v3-blender-lab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blender-human-prototype
+          path: dist
+          if-no-files-found: error
