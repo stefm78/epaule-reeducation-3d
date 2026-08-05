@@ -1,0 +1,54 @@
+{
+  "source": "Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.gltf",
+  "resolved": [
+    {
+      "uri": "Superhero_Male_FullBody.bin",
+      "source": "Universal Base Characters[Standard]/Base Characters/Godot - UE/Superhero_Male_FullBody.bin",
+      "method": "exact",
+      "bytes": 720076
+    },
+    {
+      "uri": "T_Hair_1_Normal_png.png",
+      "source": "Universal Base Characters[Standard]/Hairstyles/Origin at 0/glTF (Godot)/T_Hair_1_Normal.png",
+      "method": "repaired-name",
+      "bytes": 4326126
+    },
+    {
+      "uri": "T_Hair_1_BaseColor.png",
+      "source": "Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Hair_1_BaseColor.png",
+      "method": "exact",
+      "bytes": 1570376
+    },
+    {
+      "uri": "T_Eye_Normal_png.png",
+      "source": "Universal Base Characters[Standard]/Base Characters/Textures/Normals Unity - Godot/T_Eye_Normal.png",
+      "method": "repaired-name",
+      "bytes": 15099
+    },
+    {
+      "uri": "T_Eye_Brown.png",
+      "source": "Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Eye_Brown.png",
+      "method": "exact",
+      "bytes": 35958
+    },
+    {
+      "uri": "T_Superhero_Male_Normal.png",
+      "source": "Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Male_Normal.png",
+      "method": "exact",
+      "bytes": 4252937
+    },
+    {
+      "uri": "T_Superhero_Male_Dark.png",
+      "source": "Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Male_Dark.png",
+      "method": "exact",
+      "bytes": 1384380
+    },
+    {
+      "uri": "T_Superhero_Male_Roughness.png",
+      "source": "Universal Base Characters[Standard]/Base Characters/Godot - UE/T_Superhero_Male_Roughness.png",
+      "method": "exact",
+      "bytes": 3152049
+    }
+  ],
+  "bytes": 15487990
+}

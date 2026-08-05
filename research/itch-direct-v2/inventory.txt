@@ -1,0 +1,10 @@
+LICENSE.md	175 bytes
+Superhero_Male_FullBody.bin	720076 bytes
+Superhero_Male_FullBody.gltf	30989 bytes
+T_Eye_Brown.png	35958 bytes
+T_Eye_Normal_png.png	15099 bytes
+T_Hair_1_BaseColor.png	1570376 bytes
+T_Hair_1_Normal_png.png	4326126 bytes
+T_Superhero_Male_Dark.png	1384380 bytes
+T_Superhero_Male_Normal.png	4252937 bytes
+T_Superhero_Male_Roughness.png	3152049 bytes
