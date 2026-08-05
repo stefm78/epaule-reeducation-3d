@@ -34,8 +34,7 @@ jobs:
           "V(.26*sg,.18,.12)":"V(.26*sg,.18,-.12)",
           "V(.12*sg,.11,.20+.62*a)":"V(.12*sg,.11,-.20-.62*a)",
           "V(.04*sg,.02,-.38*wave)":"V(.04*sg,.02,.38*wave)",
-          "V(.05*sg,.04,-.82*wave)":"V(.05*sg,.04,.82*wave)",
-          "camera.position.set(3.7,2.35,2.8);controls.target.set(0,.72,-.65)":"camera.position.set(5.0,2.4,.5);controls.target.set(0,.62,.25)"
+          "V(.05*sg,.04,-.82*wave)":"V(.05*sg,.04,.82*wave)"
           }
           for old,new in changes.items():
               if old not in s: raise SystemExit('MISSING_PATTERN: '+old)
