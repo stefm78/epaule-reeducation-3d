@@ -16,15 +16,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/human-v3-blender-lab
-      - name: Install Blender
+      - name: Install Blender headless dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender libegl1 libgl1 libopengl0 libglx0 xvfb
           blender --version
+          ldconfig -p | grep -E 'libEGL.so.1|libGL.so.1' || true
       - name: Generate rig, animation and QA renders
         run: |
           rm -rf dist
-          OUT_DIR=dist blender -b --python tools/build_human.py
+          OUT_DIR=dist xvfb-run -a blender -b --python tools/build_human.py
           test -s dist/kinesio-human.glb
           ls -lh dist dist/qa
       - name: Commit candidate evidence
