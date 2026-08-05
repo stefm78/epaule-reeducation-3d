@@ -1,0 +1,35 @@
+name: Quaternius skeleton report
+on:
+  push:
+    branches: [agent/human-v2-asset-lab]
+    paths: [.github/workflows/skeleton-report.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/human-v2-asset-lab}
+      - name: Build skeleton and model report
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('assets/quaternius/fullbody/Superhero_Male_FullBody.gltf')
+          x=json.loads(p.read_text())
+          nodes=x.get('nodes',[]);skins=x.get('skins',[])
+          joints=set(j for s in skins for j in s.get('joints',[]))
+          key=('root','pelvis','hip','spine','chest','neck','head','clav','shoulder','upper','arm','forearm','hand','thigh','calf','shin','foot','toe')
+          report={'node_count':len(nodes),'mesh_count':len(x.get('meshes',[])),'skin_count':len(skins),'animation_count':len(x.get('animations',[])),'joint_count':len(joints),'joints':[{'index':i,'name':nodes[i].get('name',''),'children':nodes[i].get('children',[])} for i in sorted(joints)],'key_nodes':[{'index':i,'name':n.get('name','')} for i,n in enumerate(nodes) if any(k in n.get('name','').lower() for k in key)]}
+          out=Path('research/skeleton');out.mkdir(parents=True,exist_ok=True);(out/'report.json').write_text(json.dumps(report,indent=2))
+          (out/'joints.txt').write_text('\n'.join(f"{v['index']:03d} {v['name']}" for v in report['joints'])+'\n')
+          PY
+      - name: Commit report
+        run: |
+          git config user.name epaule-3d-asset-lab
+          git config user.email 104558808+stefm78@users.noreply.github.com
+          git add research/skeleton
+          git commit -m 'chore: inventory Quaternius human skeleton'
+          git push origin HEAD:agent/human-v2-asset-lab
