@@ -12,51 +12,90 @@ permissions:
   contents: write
 
 jobs:
-  inspect-assets:
+  acquire-and-audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
           ref: agent/human-v2-asset-lab
-      - name: Inspect candidate download pages
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser tooling
+        run: |
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+      - name: Acquire free CC0 standard package and inventory models
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p research
-          curl -fsSL --retry 3 --retry-delay 2 \
-            'https://quaternius.com/packs/universalbasecharacters.html' \
-            -o research/quaternius-base-characters.html
-          python3 - <<'PY'
+          rm -rf research/browser research/package
+          mkdir -p research/browser research/package
+          cat > /tmp/acquire.py <<'PY'
           from pathlib import Path
-          from html.parser import HTMLParser
-          from urllib.parse import urljoin
+          from playwright.sync_api import sync_playwright
+          import json, traceback
 
-          base = 'https://quaternius.com/packs/universalbasecharacters.html'
-          text = Path('research/quaternius-base-characters.html').read_text(errors='replace')
-          class Links(HTMLParser):
-              def __init__(self):
-                  super().__init__(); self.links=[]
-              def handle_starttag(self, tag, attrs):
-                  if tag == 'a':
-                      href = dict(attrs).get('href')
-                      if href: self.links.append(urljoin(base, href))
-          p=Links(); p.feed(text)
-          links=sorted(set(p.links))
-          Path('research/quaternius-links.txt').write_text('\n'.join(links)+'\n')
+          out=Path('research/browser')
+          report=[]
+          zip_path=None
+          with sync_playwright() as pw:
+              browser=pw.chromium.launch(headless=True)
+              context=browser.new_context(accept_downloads=True, viewport={'width':1280,'height':900})
+              page=context.new_page()
+              try:
+                  page.goto('https://quaternius.itch.io/universal-base-characters/purchase', wait_until='networkidle', timeout=120000)
+                  page.screenshot(path=str(out/'01-purchase.png'), full_page=True)
+                  report.append({'stage':'purchase','url':page.url,'title':page.title(),'links':page.locator('a').evaluate_all('(els)=>els.map(e=>({text:(e.innerText||e.textContent||" ").trim(),href:e.href})).filter(x=>x.text||x.href)')})
+                  free=page.get_by_text('No thanks, just take me to the downloads', exact=False)
+                  if free.count():
+                      free.first.click()
+                      page.wait_for_load_state('networkidle', timeout=120000)
+                  page.screenshot(path=str(out/'02-downloads.png'), full_page=True)
+                  report.append({'stage':'downloads','url':page.url,'title':page.title(),'body':page.locator('body').inner_text()[:12000],'links':page.locator('a').evaluate_all('(els)=>els.map(e=>({text:(e.innerText||e.textContent||" ").trim(),href:e.href})).filter(x=>x.text||x.href)')})
+                  candidates=page.locator('a').filter(has_text='Universal Base Characters')
+                  target=None
+                  for i in range(candidates.count()):
+                      a=candidates.nth(i)
+                      txt=a.inner_text().lower()
+                      if 'standard' in txt and 'source' not in txt:
+                          target=a;break
+                  if target is None:
+                      target=page.locator('a[href*="download"]').first
+                  with page.expect_download(timeout=120000) as info:
+                      target.click()
+                  download=info.value
+                  zip_path=Path('/tmp')/(download.suggested_filename or 'universal-base-characters-standard.zip')
+                  download.save_as(str(zip_path))
+                  report.append({'stage':'download','filename':zip_path.name,'bytes':zip_path.stat().st_size})
+              except Exception as exc:
+                  report.append({'stage':'error','error':repr(exc),'traceback':traceback.format_exc(),'url':page.url})
+                  page.screenshot(path=str(out/'99-error.png'), full_page=True)
+              finally:
+                  browser.close()
+          Path('research/browser-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          if zip_path and zip_path.exists():
+              Path('/tmp/asset_zip_path').write_text(str(zip_path))
           PY
-          {
-            echo '# Candidate asset links';
-            grep -Ei 'download|itch|zip|drive|dropbox|storage|cdn' research/quaternius-links.txt || true;
-          } > research/asset-lab-report.md
-      - name: Commit inspection report
+          python /tmp/acquire.py
+          if [[ -f /tmp/asset_zip_path ]]; then
+            ZIP="$(cat /tmp/asset_zip_path)"
+            unzip -l "$ZIP" > research/package-inventory.txt
+            unzip -q "$ZIP" -d research/package
+            find research/package -type f \( -iname '*.glb' -o -iname '*.gltf' -o -iname '*.fbx' -o -iname '*.obj' -o -iname '*license*' -o -iname '*readme*' \) -printf '%P\t%s bytes\n' | sort > research/model-inventory.txt
+          else
+            printf 'DOWNLOAD_NOT_ACQUIRED\n' > research/package-inventory.txt
+            : > research/model-inventory.txt
+          fi
+      - name: Commit audit evidence
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf research/package
           git config user.name 'epaule-3d-asset-lab'
           git config user.email '104558808+stefm78@users.noreply.github.com'
           git add research/
-          if git diff --cached --quiet; then
-            exit 0
-          fi
-          git commit -m 'chore: inspect CC0 human asset sources'
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'chore: audit downloadable CC0 human models'
           git push origin HEAD:agent/human-v2-asset-lab
