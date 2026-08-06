@@ -24,7 +24,8 @@ jobs:
           npm install --no-audit --no-fund
           npm run build:v4
           test -s app-v4.bundle.js
-          test -s assets/quaternius/fullbody/Regular_Male_FullBody.gltf
+          compgen -G 'assets/quaternius/fullbody/*Male_FullBody.gltf' >/dev/null
+          test -s assets/quaternius/fullbody/T_Neutral_Male.png
       - name: Assemble minimal public application
         shell: bash
         run: |
@@ -48,7 +49,7 @@ jobs:
 
           PWA personnelle de mémorisation et de discussion des exercices avec le kinésithérapeute traitant.
 
-          Le modèle humain neutre provient de Universal Base Characters par Quaternius, diffusé sous CC0 1.0 Universal.
+          Le corps complet riggé provient de Universal Base Characters par Quaternius, diffusé sous CC0 1.0 Universal. Son matériau et ses proportions ont été neutralisés pour un rendu moins athlétique.
 
           La séquence repose sur des principes publiés de rééducation active, de contrôle scapulaire et de progression de charge. Elle ne constitue pas une prescription clinique individuelle.
           EOF
