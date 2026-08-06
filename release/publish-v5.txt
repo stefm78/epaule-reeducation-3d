@@ -1,0 +1,8 @@
+publish validated V5 clinical candidate
+QA run: 31078231475
+candidate head: c0d803e309885878577fd357cea62451b6972a48
+artifact: v5-clinical-product-evidence
+artifact sha256: 945c883cf8e5cf6f0945822fe42f1a546c402330e0b2e730a04ab818a366ccfd
+continuity maximum step: 0.09610887073962916
+continuity wrap distance: 0
+camera target distance to model center: 0.002232146257797858
