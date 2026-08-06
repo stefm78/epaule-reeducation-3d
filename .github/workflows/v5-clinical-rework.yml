@@ -1,0 +1,87 @@
+name: Acquire neutral V5 body
+on:
+  push:
+    branches: [agent/human-v4-quaternius]
+    paths: [.github/workflows/v5-clinical-rework.yml]
+permissions:
+  contents: write
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/human-v4-quaternius
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download Quaternius regular body
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check playwright
+          python -m playwright install --with-deps chromium
+          rm -rf /tmp/qv5
+          mkdir -p /tmp/qv5
+          cat >/tmp/qv5/download.py <<'PY'
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          out=Path('/tmp/qv5/base-characters.zip')
+          with sync_playwright() as pw:
+              browser=pw.chromium.launch(headless=True)
+              context=browser.new_context(accept_downloads=True)
+              page=context.new_page()
+              page.goto('https://quaternius.itch.io/universal-base-characters/purchase',wait_until='domcontentloaded',timeout=120000)
+              page.get_by_text('No thanks, just take me to the downloads',exact=False).first.click()
+              page.wait_for_url('**/download/**',timeout=120000)
+              page.wait_for_timeout(1500)
+              with page.expect_download(timeout=180000) as info:
+                  page.locator('#game_download_511124 .download_btn').click(force=True)
+              info.value.save_as(str(out))
+              browser.close()
+          PY
+          python /tmp/qv5/download.py
+          unzip -q /tmp/qv5/base-characters.zip -d /tmp/qv5/unpacked
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, shutil
+          root=Path('/tmp/qv5/unpacked')
+          candidates=[]
+          for p in root.rglob('*.gltf'):
+              n=p.name.lower()
+              if 'regular' in n and 'male' in n and 'female' not in n and 'fullbody' in n:
+                  candidates.append(p)
+          if not candidates:
+              names='\n'.join(sorted(str(p.relative_to(root)) for p in root.rglob('*.gltf') if 'regular' in p.name.lower()))
+              raise SystemExit('REGULAR_MALE_FULLBODY_NOT_FOUND\n'+names)
+          candidates.sort(key=lambda p:(0 if 'godot - ue' in str(p).lower() else 1,len(str(p))))
+          src=candidates[0]
+          data=json.loads(src.read_text())
+          out=Path('assets/quaternius/fullbody')
+          shutil.rmtree(out,ignore_errors=True)
+          out.mkdir(parents=True)
+          main=out/'Regular_Male_FullBody.gltf'
+          shutil.copy2(src,main)
+          copied=[]
+          for group in ('buffers','images'):
+              for item in data.get(group,[]):
+                  uri=item.get('uri','')
+                  if uri and not uri.startswith('data:'):
+                      source=(src.parent/uri).resolve()
+                      dest=out/uri
+                      dest.parent.mkdir(parents=True,exist_ok=True)
+                      shutil.copy2(source,dest)
+                      copied.append(uri)
+          (out/'LICENSE.md').write_text('Universal Base Characters by Quaternius — CC0 1.0 Universal.\nSelected neutral-proportion asset: Regular male full body.\n')
+          Path('research').mkdir(exist_ok=True)
+          Path('research/v5-neutral-body.json').write_text(json.dumps({'source':str(src.relative_to(root)),'dependencies':copied},indent=2))
+          print(src)
+          PY
+      - name: Commit neutral body
+        run: |
+          git config user.name epaule-v5-asset
+          git config user.email 104558808+stefm78@users.noreply.github.com
+          git add assets/quaternius/fullbody research/v5-neutral-body.json
+          git commit -m 'feat: replace superhero body with neutral regular human'
+          git push origin HEAD:agent/human-v4-quaternius
