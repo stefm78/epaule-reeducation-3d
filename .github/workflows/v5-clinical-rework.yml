@@ -1,4 +1,4 @@
-name: Prepare neutral V5 model texture
+name: Apply neutral V5 body rendering
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -6,33 +6,32 @@ on:
 permissions:
   contents: write
 jobs:
-  prepare:
+  apply:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           ref: agent/human-v4-quaternius
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Create softened model texture
+      - name: Apply neutral material and proportions
         run: |
-          python -m pip install --disable-pip-version-check pillow
           python3 - <<'PY'
-          from PIL import Image, ImageFilter, ImageEnhance
-          source=Image.open('assets/quaternius/fullbody/T_Superhero_Male_Dark.png').convert('RGB')
-          result=source.filter(ImageFilter.GaussianBlur(18))
-          result=ImageEnhance.Contrast(result).enhance(.82)
-          result=ImageEnhance.Color(result).enhance(.78)
-          mask=source.convert('L').point(lambda value: 255 if value < 72 else 0)
-          result.paste(source,mask=mask)
-          result.save('assets/quaternius/fullbody/T_Neutral_Male.png',optimize=True)
+          from pathlib import Path
+          path=Path('src/app-v4.js')
+          text=path.read_text()
+          old_loader="function loadModel(){new GLTFLoader().load('assets/quaternius/fullbody/Regular_Male_FullBody.gltf'"
+          new_loader="function loadModel(){const neutralTexture=new THREE.TextureLoader().load('assets/quaternius/fullbody/T_Neutral_Male.png');neutralTexture.flipY=false;neutralTexture.colorSpace=THREE.SRGBColorSpace;new GLTFLoader().load('assets/quaternius/fullbody/Superhero_Male_FullBody.gltf'"
+          old_mesh="if(object.isMesh){object.castShadow=true;object.receiveShadow=true;object.frustumCulled=false}"
+          new_mesh="if(object.isMesh){object.castShadow=true;object.receiveShadow=true;object.frustumCulled=false;if(object.material?.name?.toLowerCase().includes('superhero')){object.material=object.material.clone();object.material.map=neutralTexture;object.material.normalMap=null;object.material.roughness=.92;object.material.metalness=0;object.material.needsUpdate=true}}"
+          old_scale="model.scale.setScalar(2/height);"
+          new_scale="const scale=2/height;model.scale.set(scale*.84,scale,scale*.90);"
+          for old,new in ((old_loader,new_loader),(old_mesh,new_mesh),(old_scale,new_scale)):
+              if old not in text: raise SystemExit('PATCH_PATTERN_NOT_FOUND: '+old[:80])
+              text=text.replace(old,new,1)
+          path.write_text(text)
           PY
-      - name: Commit texture
-        run: |
-          git config user.name epaule-v5-asset
+          git config user.name epaule-v5-render
           git config user.email 104558808+stefm78@users.noreply.github.com
-          git add assets/quaternius/fullbody/T_Neutral_Male.png
-          git commit -m 'asset: add neutral model texture'
+          git add src/app-v4.js
+          git commit -m 'fix: render a neutral less muscular body'
           git push origin HEAD:agent/human-v4-quaternius
