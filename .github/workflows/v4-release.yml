@@ -8,7 +8,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,11 +38,15 @@ jobs:
           cp source/assets/quaternius/fullbody/* release/assets/quaternius/fullbody/
           touch release/.nojekyll
           cat > release/sw.js <<'EOF'
-          const CACHE='epaule-v5-clinical-1';
-          const SHELL=['./','./index.html','./styles-v4.css','./app-v4.bundle.js','./pwa.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png'];
+          const CACHE='epaule-v6-cache-migration-1';
+          const VERSION='v6-cache-migration-1';
+          const SHELL=['./','./index.html',`./styles-v4.css?${VERSION}`,`./app-v4.bundle.js?${VERSION}`,`./pwa.js?${VERSION}`,`./manifest.webmanifest?${VERSION}`,'./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png'];
+          const isCritical=request=>request.mode==='navigate'||['script','style','worker','manifest'].includes(request.destination)||/\.(?:html|js|css|gltf|bin|webmanifest)$/i.test(new URL(request.url).pathname);
+          async function networkFirst(request){const cache=await caches.open(CACHE);try{const response=await fetch(request,{cache:'no-store'});if(response.ok)await cache.put(request,response.clone());return response}catch(error){const cached=await caches.match(request);if(cached)return cached;if(request.mode==='navigate')return caches.match('./index.html');throw error}}
+          async function cacheFirst(request){const cached=await caches.match(request);if(cached)return cached;const response=await fetch(request);if(response.ok){const cache=await caches.open(CACHE);await cache.put(request,response.clone())}return response}
           self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting()});
-          self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim()});
-          self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response}).catch(()=>caches.match('./index.html'))))});
+          self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();const old=keys.filter(key=>key!==CACHE);await Promise.all(old.map(key=>caches.delete(key)));await self.clients.claim();if(old.length){const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});await Promise.all(windows.map(client=>client.navigate(client.url).catch(()=>null)))}})())});
+          self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const url=new URL(event.request.url);if(url.origin!==self.location.origin)return;event.respondWith(isCritical(event.request)?networkFirst(event.request):cacheFirst(event.request))});
           EOF
           cat > release/README.md <<'EOF'
           # Épaule 3D
@@ -53,6 +57,8 @@ jobs:
 
           La séquence repose sur des principes publiés de rééducation active, de contrôle scapulaire et de progression de charge. Elle ne constitue pas une prescription clinique individuelle.
           EOF
+          grep -q 'v=6-cache-migration-1' release/index.html
+          grep -q 'epaule-v6-cache-migration-1' release/sw.js
       - uses: actions/checkout@v4
         with:
           ref: main
@@ -67,5 +73,27 @@ jobs:
           git config user.name epaule-v5-release
           git config user.email 104558808+stefm78@users.noreply.github.com
           git add -A
-          git commit -m 'release: publish clinically reworked V5 rehabilitation PWA'
+          git commit -m 'release: publish V5 cache-migration hotfix'
           git push origin HEAD:main
+      - name: Verify the deployed GitHub Pages application
+        shell: bash
+        run: |
+          set -euo pipefail
+          PUBLIC='https://stefm78.github.io/epaule-reeducation-3d'
+          for attempt in {1..60}; do
+            stamp="${GITHUB_RUN_ID}-${attempt}"
+            if curl -fsS "$PUBLIC/?verify=$stamp" -o /tmp/public-index.html \
+              && grep -q 'v=6-cache-migration-1' /tmp/public-index.html \
+              && curl -fsS "$PUBLIC/sw.js?verify=$stamp" -o /tmp/public-sw.js \
+              && grep -q 'epaule-v6-cache-migration-1' /tmp/public-sw.js \
+              && curl -fsS "$PUBLIC/assets/quaternius/fullbody/Superhero_Male_FullBody.gltf?verify=$stamp" -o /tmp/public-model.gltf \
+              && grep -q 'Superhero_Male_FullBody.bin' /tmp/public-model.gltf \
+              && curl -fsS "$PUBLIC/assets/quaternius/fullbody/Superhero_Male_FullBody.bin?verify=$stamp" -o /tmp/public-model.bin \
+              && test -s /tmp/public-model.bin; then
+              echo 'PUBLIC_PWA_AND_MODEL_PASS'
+              exit 0
+            fi
+            sleep 2
+          done
+          echo 'PUBLIC_PWA_OR_MODEL_NOT_READY' >&2
+          exit 1
