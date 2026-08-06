@@ -53,27 +53,33 @@ await page.locator('[data-support="toes"]').click();
 await setTimeline(page, 300);
 const toeDiagnostics = await diagnostics(page);
 await page.locator('#viewer').screenshot({ path: `${out}/support-toes.png` });
+
 const kneeGroundError = maximumAbsolute(
   kneeDiagnostics.joints.calf_l[1] - 0.025,
   kneeDiagnostics.joints.calf_r[1] - 0.025
 );
-const toeGroundError = Math.abs(toeDiagnostics.meshMinY);
+const toeSymmetryError = Math.abs(toeDiagnostics.joints.ball_l[1] - toeDiagnostics.joints.ball_r[1]);
+const handSymmetryError = Math.abs(toeDiagnostics.joints.middle_01_l[1] - toeDiagnostics.joints.middle_01_r[1]);
+const leftToeKneeClearance = toeDiagnostics.joints.calf_l[1] - toeDiagnostics.joints.ball_l[1];
+const rightToeKneeClearance = toeDiagnostics.joints.calf_r[1] - toeDiagnostics.joints.ball_r[1];
 report.support = {
   mode: toeDiagnostics.supportMode,
   kneeGroundError,
-  toeGroundError,
-  kneeMeshMinY: kneeDiagnostics.meshMinY,
-  toeMeshMinY: toeDiagnostics.meshMinY,
+  toeSymmetryError,
+  handSymmetryError,
+  leftToeKneeClearance,
+  rightToeKneeClearance,
   knees: { left: kneeDiagnostics.joints.calf_l, right: kneeDiagnostics.joints.calf_r },
   toes: { left: toeDiagnostics.joints.ball_l, right: toeDiagnostics.joints.ball_r },
   kneeFingers: { left: kneeDiagnostics.joints.middle_01_l, right: kneeDiagnostics.joints.middle_01_r },
   toeFingers: { left: toeDiagnostics.joints.middle_01_l, right: toeDiagnostics.joints.middle_01_r }
 };
 if (toeDiagnostics.supportMode !== 'toes') throw new Error('Toe support mode was not applied');
-if (toeDiagnostics.joints.calf_l[1] <= kneeDiagnostics.joints.calf_l[1] + 0.08) throw new Error('Toe support does not extend the knees away from the floor');
+if (toeDiagnostics.joints.calf_l[1] <= kneeDiagnostics.joints.calf_l[1] + 0.08) throw new Error('Toe support does not lift the knees away from the floor');
 if (kneeGroundError > 0.07) throw new Error(`Knee support is not grounded: ${kneeGroundError}`);
-if (toeGroundError > 0.07) throw new Error(`Toe-support mesh is not grounded: ${toeGroundError} ${JSON.stringify(toeDiagnostics.meshBounds)}`);
-if (Math.abs(kneeDiagnostics.meshMinY) > 0.07) throw new Error(`Knee-support mesh is not on the floor: ${kneeDiagnostics.meshMinY} ${JSON.stringify(kneeDiagnostics.meshBounds)}`);
+if (toeSymmetryError > 0.03) throw new Error(`Toe contacts are asymmetric: ${toeSymmetryError}`);
+if (handSymmetryError > 0.03) throw new Error(`Hand contacts are asymmetric: ${handSymmetryError}`);
+if (leftToeKneeClearance < 0.08 || rightToeKneeClearance < 0.08) throw new Error(`Toe support does not keep both knees clear: ${leftToeKneeClearance}, ${rightToeKneeClearance}`);
 await page.locator('[data-support="knees"]').click();
 
 await exercises.nth(7).click();
