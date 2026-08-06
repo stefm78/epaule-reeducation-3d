@@ -21,7 +21,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --disable-pip-version-check playwright
-          python -m playwright install --with-deps chromium
+          python -m playwright install chromium
           rm -rf /tmp/qv5
           mkdir -p /tmp/qv5
           cat >/tmp/qv5/download.py <<'PY'
@@ -35,9 +35,13 @@ jobs:
               page.goto('https://quaternius.itch.io/universal-base-characters/purchase',wait_until='domcontentloaded',timeout=120000)
               page.get_by_text('No thanks, just take me to the downloads',exact=False).first.click()
               page.wait_for_url('**/download/**',timeout=120000)
-              page.wait_for_timeout(1500)
+              page.wait_for_timeout(1800)
+              buttons=page.locator('.download_btn:visible')
+              if buttons.count()==0:
+                  Path('/tmp/qv5/download-page.html').write_text(page.content())
+                  raise SystemExit('NO_VISIBLE_DOWNLOAD_BUTTON')
               with page.expect_download(timeout=180000) as info:
-                  page.locator('#game_download_511124 .download_btn').click(force=True)
+                  buttons.first.click(force=True)
               info.value.save_as(str(out))
               browser.close()
           PY
