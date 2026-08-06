@@ -1,4 +1,4 @@
-name: Expose V5 contact landmarks
+name: Correct V5 physical contact QA
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -13,19 +13,38 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/human-v4-quaternius
-      - name: Expose finger contacts and mesh floor height
+      - name: Test physical mesh contact rather than bone-centre height
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          path=Path('src/app-v4.js')
+          path=Path('qa/v4-browser.mjs')
           text=path.read_text()
-          old="const center=currentModelCenter(new THREE.Vector3()),jointNames=['upperarm_l','hand_l','upperarm_r','hand_r','calf_l','foot_l','ball_l','calf_r','foot_r','ball_r'],joints={};for(const name of jointNames)joints[name]=wp(name).toArray();return{ready,exercise:EXERCISES[current].id,supportMode,camera:{panEnabled:controls.enablePan,target:controls.target.toArray(),center:center.toArray(),distanceToCenter:controls.target.distanceTo(center),distance:camera.position.distanceTo(controls.target)},joints}"
-          new="const center=currentModelCenter(new THREE.Vector3()),jointNames=['upperarm_l','hand_l','middle_01_l','upperarm_r','hand_r','middle_01_r','calf_l','foot_l','ball_l','calf_r','foot_r','ball_r'],joints={};for(const name of jointNames)joints[name]=wp(name).toArray();const meshMinY=new THREE.Box3().setFromObject(model).min.y;return{ready,exercise:EXERCISES[current].id,supportMode,meshMinY,camera:{panEnabled:controls.enablePan,target:controls.target.toArray(),center:center.toArray(),distanceToCenter:controls.target.distanceTo(center),distance:camera.position.distanceTo(controls.target)},joints}"
-          if old not in text: raise SystemExit('DIAGNOSTICS_PATTERN_NOT_FOUND')
-          path.write_text(text.replace(old,new,1))
+          old="""const kneeGroundError = maximumAbsolute(
+  kneeDiagnostics.joints.calf_l[1] - 0.025,
+  kneeDiagnostics.joints.calf_r[1] - 0.025,
+  kneeDiagnostics.joints.middle_01_l[1] - 0.018,
+  kneeDiagnostics.joints.middle_01_r[1] - 0.018
+);
+const toeGroundError = maximumAbsolute(
+  toeDiagnostics.joints.ball_l[1] - 0.025,
+  toeDiagnostics.joints.ball_r[1] - 0.025,
+  toeDiagnostics.joints.middle_01_l[1] - 0.018,
+  toeDiagnostics.joints.middle_01_r[1] - 0.018
+);"""
+          new="""const kneeGroundError = maximumAbsolute(
+  kneeDiagnostics.joints.calf_l[1] - 0.025,
+  kneeDiagnostics.joints.calf_r[1] - 0.025
+);
+const toeGroundError = Math.abs(toeDiagnostics.meshMinY);"""
+          if old not in text: raise SystemExit('GROUND_ERROR_BLOCK_NOT_FOUND')
+          text=text.replace(old,new,1)
+          old_test="if (toeGroundError > 0.07) throw new Error(`Toe support is not grounded: ${toeGroundError}`);"
+          new_test="if (toeGroundError > 0.07) throw new Error(`Toe-support mesh is not grounded: ${toeGroundError}`);"
+          if old_test not in text: raise SystemExit('TOE_TEST_NOT_FOUND')
+          path.write_text(text.replace(old_test,new_test,1))
           PY
           git config user.name epaule-v5-qa
           git config user.email 104558808+stefm78@users.noreply.github.com
-          git add src/app-v4.js
-          git commit -m 'test: expose anatomical contact landmarks'
+          git add qa/v4-browser.mjs
+          git commit -m 'test: validate physical mesh floor contact'
           git push origin HEAD:agent/human-v4-quaternius
