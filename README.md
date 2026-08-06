@@ -1,11 +1,23 @@
 # Rééducation épaule gauche — Exercices 3D
 
-PWA personnelle présentant sept exercices de fin de rééducation de l’épaule gauche, avec animation interactive et repérage pédagogique des zones musculaires.
+PWA personnelle pour mémoriser, visualiser et discuter avec le kinésithérapeute traitant huit exercices de l’épaule gauche.
+
+## Principes de la V5
+
+- progression de faible vers forte charge ;
+- contrôle scapulaire et de la coiffe avant les exercices pliométriques ;
+- choix explicite des pompes sur les genoux ou sur les pointes de pieds ;
+- pompes dynamique et plongeante classées avancées et exclues de la séquence automatique prudente ;
+- trajectoire plongeante continue et caméra centrée sur le corps.
+
+La structure s’appuie sur les recommandations contemporaines de rééducation active de l’épaule et sur la littérature biomécanique des exercices en chaîne fermée. Elle ne remplace pas un diagnostic, une prescription ni une validation clinique individuelle.
+
+Référence directrice : Rotator Cuff Tendinopathy Diagnosis, Nonsurgical Medical Care, and Rehabilitation — Clinical Practice Guideline, JOSPT 2025, DOI 10.2519/jospt.2025.13182.
 
 ## Installation Android
 
-Ouvrir la page GitHub Pages dans Chrome, puis choisir **Installer l’application** ou **Ajouter à l’écran d’accueil**. Après la première ouverture, les fichiers sont mis en cache pour un fonctionnement hors ligne.
+Ouvrir la page GitHub Pages dans Chrome, puis choisir **Installer l’application** ou **Ajouter à l’écran d’accueil**. Après une première ouverture complète, les fichiers utilisés sont mis en cache pour le fonctionnement hors ligne.
 
-## Cadre d’utilisation
+## Actif 3D
 
-Cette application mémorise les exercices transmis par le kinésithérapeute. Elle ne remplace pas ses consignes de charge, d’amplitude et de fréquence. Les intensités musculaires sont pédagogiques et ne constituent pas une mesure EMG individuelle.
+Modèle masculin aux proportions neutres issu de **Universal Base Characters** par Quaternius, licence CC0 1.0 Universal.
