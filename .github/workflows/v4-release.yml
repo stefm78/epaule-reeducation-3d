@@ -1,8 +1,8 @@
-name: Publish validated V4
+name: Publish validated V5 clinical PWA
 on:
   push:
     branches: [agent/human-v4-quaternius]
-    paths: [release/publish-v4.txt]
+    paths: [release/publish-v5.txt]
 permissions:
   contents: write
 jobs:
@@ -24,6 +24,7 @@ jobs:
           npm install --no-audit --no-fund
           npm run build:v4
           test -s app-v4.bundle.js
+          test -s assets/quaternius/fullbody/Regular_Male_FullBody.gltf
       - name: Assemble minimal public application
         shell: bash
         run: |
@@ -36,20 +37,20 @@ jobs:
           cp source/assets/quaternius/fullbody/* release/assets/quaternius/fullbody/
           touch release/.nojekyll
           cat > release/sw.js <<'EOF'
-          const CACHE='epaule-v4-human-2';
-          const CORE=['./','./index.html','./styles-v4.css','./app-v4.bundle.js','./pwa.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./assets/quaternius/fullbody/Superhero_Male_FullBody.gltf','./assets/quaternius/fullbody/Superhero_Male_FullBody.bin','./assets/quaternius/fullbody/T_Eye_Brown.png','./assets/quaternius/fullbody/T_Eye_Normal_png.png','./assets/quaternius/fullbody/T_Hair_1_BaseColor.png','./assets/quaternius/fullbody/T_Hair_1_Normal_png.png','./assets/quaternius/fullbody/T_Superhero_Male_Dark.png','./assets/quaternius/fullbody/T_Superhero_Male_Normal.png','./assets/quaternius/fullbody/T_Superhero_Male_Roughness.png'];
-          self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));self.skipWaiting()});
+          const CACHE='epaule-v5-clinical-1';
+          const SHELL=['./','./index.html','./styles-v4.css','./app-v4.bundle.js','./pwa.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png'];
+          self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting()});
           self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim()});
           self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response}).catch(()=>caches.match('./index.html'))))});
           EOF
           cat > release/README.md <<'EOF'
           # Épaule 3D
 
-          PWA personnelle de mémorisation des exercices transmis par le kinésithérapeute.
+          PWA personnelle de mémorisation et de discussion des exercices avec le kinésithérapeute traitant.
 
-          Le modèle humain `Superhero_Male_FullBody` provient de Universal Base Characters par Quaternius, diffusé sous CC0 1.0 Universal.
+          Le modèle humain neutre provient de Universal Base Characters par Quaternius, diffusé sous CC0 1.0 Universal.
 
-          Les animations et zones musculaires sont pédagogiques. Elles ne remplacent ni une prescription ni une validation clinique.
+          La séquence repose sur des principes publiés de rééducation active, de contrôle scapulaire et de progression de charge. Elle ne constitue pas une prescription clinique individuelle.
           EOF
       - uses: actions/checkout@v4
         with:
@@ -62,8 +63,8 @@ jobs:
           find public -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -a release/. public/
           cd public
-          git config user.name epaule-v4-release
+          git config user.name epaule-v5-release
           git config user.email 104558808+stefm78@users.noreply.github.com
           git add -A
-          git commit -m 'release: publish validated V4 human rehabilitation PWA'
+          git commit -m 'release: publish clinically reworked V5 rehabilitation PWA'
           git push origin HEAD:main
