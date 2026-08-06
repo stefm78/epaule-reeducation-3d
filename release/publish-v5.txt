@@ -1,8 +1,6 @@
-publish validated V5 clinical candidate
-QA run: 31078231475
-candidate head: c0d803e309885878577fd357cea62451b6972a48
-artifact: v5-clinical-product-evidence
-artifact sha256: 945c883cf8e5cf6f0945822fe42f1a546c402330e0b2e730a04ab818a366ccfd
-continuity maximum step: 0.09610887073962916
-continuity wrap distance: 0
-camera target distance to model center: 0.002232146257797858
+publish V5 cache-migration hotfix
+QA run: 31080757755
+validated head: e2c521c149d44597c01d27cc8d21380de2de2879
+cache version: v6-cache-migration-1
+reason: Android Chrome remained controlled by the previous service worker and loaded a stale bundle while the published 3D asset path had changed
+controls: versioned shell resources, network-first critical assets, old-cache deletion, automatic client reload, public GitHub Pages asset verification
