@@ -4,43 +4,90 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const base = process.env.BASE_URL || 'http://127.0.0.1:4173/';
 const out = 'qa-output';
 await mkdir(out, { recursive: true });
-const report = { base, desktop: {}, mobile: {}, consoleErrors: [], pageErrors: [] };
+const report = { base, desktop: {}, mobile: {}, continuity: {}, camera: {}, support: {}, consoleErrors: [], pageErrors: [] };
 
 async function openPage(context, name) {
   const page = await context.newPage();
-  page.on('console', msg => { if (msg.type() === 'error') report.consoleErrors.push(`${name}: ${msg.text()}`); });
-  page.on('pageerror', err => report.pageErrors.push(`${name}: ${err.message}`));
+  page.on('console', message => { if (message.type() === 'error') report.consoleErrors.push(`${name}: ${message.text()}`); });
+  page.on('pageerror', error => report.pageErrors.push(`${name}: ${error.message}`));
   await page.goto(base, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.documentElement.dataset.ready === 'true', null, { timeout: 60000 });
   await page.waitForSelector('#viewer canvas');
   return page;
 }
 
-const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl'] });
+async function setTimeline(page, value) {
+  await page.locator('#timeline').evaluate((element, next) => {
+    element.value = String(next);
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+  }, value);
+  await page.waitForTimeout(90);
+}
 
-const desktopContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+async function diagnostics(page) { return page.evaluate(() => window.__APP_DIAGNOSTICS__()); }
+function distance(a, b) { return Math.hypot(...a.map((value, index) => value - b[index])); }
+
+const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl'] });
+const desktopContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, serviceWorkers: 'allow' });
 const page = await openPage(desktopContext, 'desktop');
 const exercises = page.locator('.exercise');
 report.desktop.exerciseCount = await exercises.count();
 if (report.desktop.exerciseCount !== 8) throw new Error(`Expected 8 exercises, got ${report.desktop.exerciseCount}`);
 
-const slugs = ['clap','shift','supine','airplane','dive','row','rotate','reach'];
-for (let i = 0; i < 8; i++) {
-  await exercises.nth(i).click();
-  await page.locator('#timeline').evaluate((el) => { el.value = '500'; el.dispatchEvent(new Event('input', { bubbles: true })); });
-  await page.waitForTimeout(250);
+const slugs = ['supine', 'reach', 'airplane', 'row', 'rotate', 'shift', 'clap', 'dive'];
+for (let index = 0; index < slugs.length; index += 1) {
+  await exercises.nth(index).click();
+  await setTimeline(page, 500);
   const title = await page.locator('#title').textContent();
-  if (!title?.trim()) throw new Error(`Missing title for exercise ${i + 1}`);
-  await page.locator('#viewer').screenshot({ path: `${out}/desktop-${i + 1}-${slugs[i]}.png` });
+  if (!title?.trim()) throw new Error(`Missing title for exercise ${index + 1}`);
+  await page.locator('#viewer').screenshot({ path: `${out}/desktop-${index + 1}-${slugs[index]}.png` });
 }
 
-await exercises.nth(4).click();
-for (const [label, value] of [['back',40],['lower',250],['forward',520],['up',750],['return',930]]) {
-  await page.locator('#timeline').evaluate((el, v) => { el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); }, value);
-  await page.waitForTimeout(220);
+await exercises.nth(5).click();
+if (!await page.locator('#supportControl').isVisible()) throw new Error('Push support selector is not visible');
+const kneeDiagnostics = await diagnostics(page);
+await page.locator('[data-support="toes"]').click();
+await setTimeline(page, 300);
+const toeDiagnostics = await diagnostics(page);
+report.support = { knees: kneeDiagnostics.joints.calf_l, toes: toeDiagnostics.joints.calf_l, toeMode: toeDiagnostics.supportMode };
+if (toeDiagnostics.supportMode !== 'toes') throw new Error('Toe support mode was not applied');
+if (toeDiagnostics.joints.calf_l[1] <= kneeDiagnostics.joints.calf_l[1] + 0.08) throw new Error('Toe support does not extend the knees away from the floor');
+await page.locator('[data-support="knees"]').click();
+
+await exercises.nth(7).click();
+const samples = [];
+for (let value = 0; value <= 1000; value += 20) {
+  await setTimeline(page, value);
+  const sample = await diagnostics(page);
+  samples.push({ value, shoulder: sample.joints.upperarm_l, wrist: sample.joints.hand_l, knee: sample.joints.calf_l });
+}
+let maximumStep = 0;
+for (let index = 1; index < samples.length; index += 1) {
+  maximumStep = Math.max(maximumStep,
+    distance(samples[index - 1].shoulder, samples[index].shoulder),
+    distance(samples[index - 1].wrist, samples[index].wrist),
+    distance(samples[index - 1].knee, samples[index].knee));
+}
+const wrapDistance = Math.max(
+  distance(samples[0].shoulder, samples.at(-1).shoulder),
+  distance(samples[0].wrist, samples.at(-1).wrist),
+  distance(samples[0].knee, samples.at(-1).knee));
+report.continuity = { maximumStep, wrapDistance };
+if (maximumStep > 0.28) throw new Error(`Dive animation discontinuity detected: ${maximumStep}`);
+if (wrapDistance > 0.045) throw new Error(`Dive loop discontinuity detected: ${wrapDistance}`);
+
+for (const [label, value] of [['back', 60], ['lower', 280], ['forward', 520], ['up', 760], ['return', 940]]) {
+  await setTimeline(page, value);
   await page.locator('#viewer').screenshot({ path: `${out}/dive-${label}.png` });
 }
 
+await page.waitForTimeout(500);
+const cameraDiagnostics = await diagnostics(page);
+report.camera = cameraDiagnostics.camera;
+if (cameraDiagnostics.camera.panEnabled !== false) throw new Error('Camera panning must be disabled');
+if (cameraDiagnostics.camera.distanceToCenter > 0.35) throw new Error(`Camera target is not centered on the model: ${cameraDiagnostics.camera.distanceToCenter}`);
+if (cameraDiagnostics.camera.distance < 2.7 || cameraDiagnostics.camera.distance > 6.3) throw new Error(`Camera distance is outside constraints: ${cameraDiagnostics.camera.distance}`);
+if (await page.locator('#level.advanced').count() !== 1) throw new Error('Advanced exercise is not clearly labelled');
 const canvasBox = await page.locator('#viewer canvas').boundingBox();
 if (!canvasBox || canvasBox.width < 400 || canvasBox.height < 350) throw new Error('3D canvas is too small');
 report.desktop.canvas = canvasBox;
@@ -58,10 +105,11 @@ await desktopContext.close();
 
 const mobileContext = await browser.newContext({ ...devices['Pixel 7'], serviceWorkers: 'allow' });
 const mobile = await openPage(mobileContext, 'mobile');
-await mobile.locator('.exercise').nth(4).click();
-await mobile.locator('#timeline').evaluate((el) => { el.value = '520'; el.dispatchEvent(new Event('input', { bubbles: true })); });
-await mobile.waitForTimeout(300);
+await mobile.locator('.exercise').nth(7).click();
+await setTimeline(mobile, 520);
 await mobile.screenshot({ path: `${out}/mobile-dive-full.png`, fullPage: true });
+const mobileDiagnostics = await diagnostics(mobile);
+if (mobileDiagnostics.camera.distanceToCenter > 0.42) throw new Error(`Mobile camera is not centered: ${mobileDiagnostics.camera.distanceToCenter}`);
 const mobileCanvas = await mobile.locator('#viewer canvas').boundingBox();
 if (!mobileCanvas || mobileCanvas.width < 300 || mobileCanvas.height < 350) throw new Error('Mobile canvas is too small');
 report.mobile.canvas = mobileCanvas;
