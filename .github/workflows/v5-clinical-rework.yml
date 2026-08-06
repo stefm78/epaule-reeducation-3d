@@ -1,4 +1,4 @@
-name: Correct V5 ground contacts
+name: Expose V5 contact landmarks
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -6,35 +6,26 @@ on:
 permissions:
   contents: write
 jobs:
-  correct:
+  patch:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           ref: agent/human-v4-quaternius
-      - name: Lock knees or toes before solving the arms
+      - name: Expose finger contacts and mesh floor height
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
           path=Path('src/app-v4.js')
           text=path.read_text()
-          support="function support({y=.72,z=0,x=0,bend=.08,base='knees',handLift=0,handX=.27}){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(x,y+(base==='toes'?.08:0),z);model.updateMatrixWorld(true);const hipLeft=wp('thigh_l'),hipRight=wp('thigh_r');if(base==='knees'){const kneeLeft=V(hipLeft.x,.035,.82),kneeRight=V(hipRight.x,.035,.82),ankleLeft=V(hipLeft.x,.045,.30),ankleRight=V(hipRight.x,.045,.30);aim('thigh_l','calf_l',kneeLeft);aim('calf_l','foot_l',ankleLeft);aim('thigh_r','calf_r',kneeRight);aim('calf_r','foot_r',ankleRight);aim('foot_l','ball_l',ankleLeft.clone().add(V(0,-.01,-.18)));aim('foot_r','ball_r',ankleRight.clone().add(V(0,-.01,-.18)))}else{const kneeLeft=V(hipLeft.x,.29,.34),kneeRight=V(hipRight.x,.29,.34),ankleLeft=V(hipLeft.x,.12,-.20),ankleRight=V(hipRight.x,.12,-.20),toeLeft=V(hipLeft.x,.018,-.49),toeRight=V(hipRight.x,.018,-.49);aim('thigh_l','calf_l',kneeLeft);aim('calf_l','foot_l',ankleLeft);aim('foot_l','ball_l',toeLeft);aim('thigh_r','calf_r',kneeRight);aim('calf_r','foot_r',ankleRight);aim('foot_r','ball_r',toeRight)}model.updateMatrixWorld(true);const contactY=base==='knees'?(wp('calf_l').y+wp('calf_r').y)/2:(wp('ball_l').y+wp('ball_r').y)/2;pivot.position.y+=.025-contactY;model.updateMatrixWorld(true);const shoulderLeft=wp('upperarm_l'),shoulderRight=wp('upperarm_r'),handLeft=V(handX,.018+handLift,1.66),handRight=V(-handX,.018+handLift,1.66),elbowLeft=shoulderLeft.clone().lerp(handLeft,.52).add(V(.16*bend,.05,0)),elbowRight=shoulderRight.clone().lerp(handRight,.52).add(V(-.16*bend,.05,0));aim('upperarm_l','lowerarm_l',elbowLeft);aim('lowerarm_l','hand_l',handLeft);aim('hand_l','middle_01_l',handLeft.clone().add(V(0,0,.22)));aim('upperarm_r','lowerarm_r',elbowRight);aim('lowerarm_r','hand_r',handRight);aim('hand_r','middle_01_r',handRight.clone().add(V(0,0,.22)));model.updateMatrixWorld(true)}\n"
-          text,count=re.subn(r"function support\(.*?\nfunction leanTorso",support+"function leanTorso",text,count=1,flags=re.S)
-          if count!=1: raise SystemExit('SUPPORT_FUNCTION_REPLACEMENT_FAILED')
-          replacements=[
-          (r"}else if\(exercise\.id==='reach'\)\{.*?}else if\(exercise\.id==='airplane'\)","}else if(exercise.id==='reach'){support({bend:.08,base:'knees'});model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1,elbow=shoulder.clone().add(V(.04*sign,.02,.38*wave)),wrist=shoulder.clone().add(V(.05*sign,.04,.82*wave));aim('upperarm_l','lowerarm_l',elbow);aim('lowerarm_l','hand_l',wrist);model.updateMatrixWorld(true)}else if(exercise.id==='airplane')"),
-          (r"}else if\(exercise\.id==='airplane'\)\{.*?}else if\(exercise\.id==='row'\)","}else if(exercise.id==='airplane'){support({bend:.08,base:'knees'});model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1,elbow=shoulder.clone().add(V(.42*sign,.08*wave,.02)),wrist=shoulder.clone().add(V(.82*sign,.10*wave,.04));aim('upperarm_l','lowerarm_l',elbow);aim('lowerarm_l','hand_l',wrist);model.updateMatrixWorld(true)}else if(exercise.id==='row')"),
-          (r"}else if\(exercise\.id==='row'\)\{.*?}else if\(exercise\.id==='rotate'\)","}else if(exercise.id==='row'){support({bend:.1,base:'knees'});model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1;if(position<.52){const amount=(1-Math.cos(position/.52*Math.PI))/2;aim('upperarm_l','lowerarm_l',shoulder.clone().add(V(.26*sign,.18*amount,-.12)));aim('lowerarm_l','hand_l',shoulder.clone().add(V(.12*sign,-.08+.22*amount,-.20)))}else{const amount=(1-Math.cos((position-.52)/.48*Math.PI))/2;aim('upperarm_l','lowerarm_l',shoulder.clone().add(V(.26*sign,.18,-.12)));aim('lowerarm_l','hand_l',shoulder.clone().add(V(.12*sign,.11,-.20-.62*amount)))}model.updateMatrixWorld(true)}else if(exercise.id==='rotate')"),
-          (r"}else if\(exercise\.id==='rotate'\)\{.*?}else if\(exercise\.id==='shift'\)","}else if(exercise.id==='rotate'){support({bend:.1,base:'knees'});model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1,elbow=shoulder.clone().add(V(.48*sign,.03,.02)),wrist=elbow.clone().add(V(0,.08+.48*wave,.28*(1-wave)));aim('upperarm_l','lowerarm_l',elbow);aim('lowerarm_l','hand_l',wrist);model.updateMatrixWorld(true)}else if(exercise.id==='shift')")]
-          for pattern,replacement in replacements:
-              text,count=re.subn(pattern,replacement,text,count=1,flags=re.S)
-              if count!=1: raise SystemExit('POSE_BRANCH_REPLACEMENT_FAILED: '+pattern)
-          path.write_text(text)
+          old="const center=currentModelCenter(new THREE.Vector3()),jointNames=['upperarm_l','hand_l','upperarm_r','hand_r','calf_l','foot_l','ball_l','calf_r','foot_r','ball_r'],joints={};for(const name of jointNames)joints[name]=wp(name).toArray();return{ready,exercise:EXERCISES[current].id,supportMode,camera:{panEnabled:controls.enablePan,target:controls.target.toArray(),center:center.toArray(),distanceToCenter:controls.target.distanceTo(center),distance:camera.position.distanceTo(controls.target)},joints}"
+          new="const center=currentModelCenter(new THREE.Vector3()),jointNames=['upperarm_l','hand_l','middle_01_l','upperarm_r','hand_r','middle_01_r','calf_l','foot_l','ball_l','calf_r','foot_r','ball_r'],joints={};for(const name of jointNames)joints[name]=wp(name).toArray();const meshMinY=new THREE.Box3().setFromObject(model).min.y;return{ready,exercise:EXERCISES[current].id,supportMode,meshMinY,camera:{panEnabled:controls.enablePan,target:controls.target.toArray(),center:center.toArray(),distanceToCenter:controls.target.distanceTo(center),distance:camera.position.distanceTo(controls.target)},joints}"
+          if old not in text: raise SystemExit('DIAGNOSTICS_PATTERN_NOT_FOUND')
+          path.write_text(text.replace(old,new,1))
           PY
-          git config user.name epaule-v5-motion
+          git config user.name epaule-v5-qa
           git config user.email 104558808+stefm78@users.noreply.github.com
           git add src/app-v4.js
-          git commit -m 'fix: lock knee and toe contacts before arm motion'
+          git commit -m 'test: expose anatomical contact landmarks'
           git push origin HEAD:agent/human-v4-quaternius
