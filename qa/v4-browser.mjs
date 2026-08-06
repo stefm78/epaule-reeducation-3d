@@ -56,28 +56,32 @@ await page.locator('#viewer').screenshot({ path: `${out}/support-toes.png` });
 const kneeGroundError = maximumAbsolute(
   kneeDiagnostics.joints.calf_l[1] - 0.025,
   kneeDiagnostics.joints.calf_r[1] - 0.025,
-  kneeDiagnostics.joints.hand_l[1] - 0.018,
-  kneeDiagnostics.joints.hand_r[1] - 0.018
+  kneeDiagnostics.joints.middle_01_l[1] - 0.018,
+  kneeDiagnostics.joints.middle_01_r[1] - 0.018
 );
 const toeGroundError = maximumAbsolute(
   toeDiagnostics.joints.ball_l[1] - 0.025,
   toeDiagnostics.joints.ball_r[1] - 0.025,
-  toeDiagnostics.joints.hand_l[1] - 0.018,
-  toeDiagnostics.joints.hand_r[1] - 0.018
+  toeDiagnostics.joints.middle_01_l[1] - 0.018,
+  toeDiagnostics.joints.middle_01_r[1] - 0.018
 );
 report.support = {
   mode: toeDiagnostics.supportMode,
   kneeGroundError,
   toeGroundError,
+  kneeMeshMinY: kneeDiagnostics.meshMinY,
+  toeMeshMinY: toeDiagnostics.meshMinY,
   knees: { left: kneeDiagnostics.joints.calf_l, right: kneeDiagnostics.joints.calf_r },
   toes: { left: toeDiagnostics.joints.ball_l, right: toeDiagnostics.joints.ball_r },
-  kneeHands: { left: kneeDiagnostics.joints.hand_l, right: kneeDiagnostics.joints.hand_r },
-  toeHands: { left: toeDiagnostics.joints.hand_l, right: toeDiagnostics.joints.hand_r }
+  kneeFingers: { left: kneeDiagnostics.joints.middle_01_l, right: kneeDiagnostics.joints.middle_01_r },
+  toeFingers: { left: toeDiagnostics.joints.middle_01_l, right: toeDiagnostics.joints.middle_01_r }
 };
 if (toeDiagnostics.supportMode !== 'toes') throw new Error('Toe support mode was not applied');
 if (toeDiagnostics.joints.calf_l[1] <= kneeDiagnostics.joints.calf_l[1] + 0.08) throw new Error('Toe support does not extend the knees away from the floor');
 if (kneeGroundError > 0.07) throw new Error(`Knee support is not grounded: ${kneeGroundError}`);
 if (toeGroundError > 0.07) throw new Error(`Toe support is not grounded: ${toeGroundError}`);
+if (Math.abs(kneeDiagnostics.meshMinY) > 0.07) throw new Error(`Knee-support mesh is not on the floor: ${kneeDiagnostics.meshMinY}`);
+if (Math.abs(toeDiagnostics.meshMinY) > 0.07) throw new Error(`Toe-support mesh is not on the floor: ${toeDiagnostics.meshMinY}`);
 await page.locator('[data-support="knees"]').click();
 
 await exercises.nth(7).click();
