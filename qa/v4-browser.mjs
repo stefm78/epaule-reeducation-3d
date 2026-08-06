@@ -45,10 +45,13 @@ for (let index = 0; index < slugs.length; index += 1) {
 
 await exercises.nth(5).click();
 if (!await page.locator('#supportControl').isVisible()) throw new Error('Push support selector is not visible');
+await setTimeline(page, 300);
 const kneeDiagnostics = await diagnostics(page);
+await page.locator('#viewer').screenshot({ path: `${out}/support-knees.png` });
 await page.locator('[data-support="toes"]').click();
 await setTimeline(page, 300);
 const toeDiagnostics = await diagnostics(page);
+await page.locator('#viewer').screenshot({ path: `${out}/support-toes.png` });
 report.support = { knees: kneeDiagnostics.joints.calf_l, toes: toeDiagnostics.joints.calf_l, toeMode: toeDiagnostics.supportMode };
 if (toeDiagnostics.supportMode !== 'toes') throw new Error('Toe support mode was not applied');
 if (toeDiagnostics.joints.calf_l[1] <= kneeDiagnostics.joints.calf_l[1] + 0.08) throw new Error('Toe support does not extend the knees away from the floor');
