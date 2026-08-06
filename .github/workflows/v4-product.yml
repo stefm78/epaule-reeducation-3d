@@ -51,7 +51,8 @@ jobs:
           self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response}).catch(()=>caches.match('./index.html'))))});
           EOF
           test -s candidate/app-v4.bundle.js
-          test -s candidate/assets/quaternius/fullbody/Regular_Male_FullBody.gltf
+          compgen -G 'candidate/assets/quaternius/fullbody/*Male_FullBody.gltf' >/dev/null
+          test -s candidate/assets/quaternius/fullbody/T_Neutral_Male.png
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Browser and biomechanical QA
