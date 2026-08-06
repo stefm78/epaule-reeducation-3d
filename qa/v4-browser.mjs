@@ -72,8 +72,8 @@ report.support = {
 if (toeDiagnostics.supportMode !== 'toes') throw new Error('Toe support mode was not applied');
 if (toeDiagnostics.joints.calf_l[1] <= kneeDiagnostics.joints.calf_l[1] + 0.08) throw new Error('Toe support does not extend the knees away from the floor');
 if (kneeGroundError > 0.07) throw new Error(`Knee support is not grounded: ${kneeGroundError}`);
-if (toeGroundError > 0.07) throw new Error(`Toe-support mesh is not grounded: ${toeGroundError}`);
-if (Math.abs(kneeDiagnostics.meshMinY) > 0.07) throw new Error(`Knee-support mesh is not on the floor: ${kneeDiagnostics.meshMinY}`);
+if (toeGroundError > 0.07) throw new Error(`Toe-support mesh is not grounded: ${toeGroundError} ${JSON.stringify(toeDiagnostics.meshBounds)}`);
+if (Math.abs(kneeDiagnostics.meshMinY) > 0.07) throw new Error(`Knee-support mesh is not on the floor: ${kneeDiagnostics.meshMinY} ${JSON.stringify(kneeDiagnostics.meshBounds)}`);
 await page.locator('[data-support="knees"]').click();
 
 await exercises.nth(7).click();
