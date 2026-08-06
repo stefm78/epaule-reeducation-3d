@@ -1,7 +1,7 @@
 # Épaule 3D
 
-PWA personnelle de mémorisation des exercices transmis par le kinésithérapeute.
+PWA personnelle de mémorisation et de discussion des exercices avec le kinésithérapeute traitant.
 
-Le modèle humain `Superhero_Male_FullBody` provient de Universal Base Characters par Quaternius, diffusé sous CC0 1.0 Universal.
+Le corps complet riggé provient de Universal Base Characters par Quaternius, diffusé sous CC0 1.0 Universal. Son matériau et ses proportions ont été neutralisés pour un rendu moins athlétique.
 
-Les animations et zones musculaires sont pédagogiques. Elles ne remplacent ni une prescription ni une validation clinique.
+La séquence repose sur des principes publiés de rééducation active, de contrôle scapulaire et de progression de charge. Elle ne constitue pas une prescription clinique individuelle.
