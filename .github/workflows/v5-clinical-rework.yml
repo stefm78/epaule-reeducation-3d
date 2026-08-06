@@ -20,8 +20,8 @@ jobs:
 
           source = Path('src/app-v4.js')
           text = source.read_text()
-          old = "const meshMinY=new THREE.Box3().setFromObject(model,true).min.y;return{ready:"
-          new = "const meshBounds=[];model.traverse(object=>{if(object.isMesh){const box=new THREE.Box3().setFromObject(object,true);meshBounds.push({name:object.name,minY:box.min.y,maxY:box.max.y})}});const meshMinY=Math.min(...meshBounds.map(item=>item.minY));return{meshBounds,ready:"
+          old = "const meshMinY=new THREE.Box3().setFromObject(model,true).min.y;return{ready,"
+          new = "const meshBounds=[];model.traverse(object=>{if(object.isMesh){const box=new THREE.Box3().setFromObject(object,true);meshBounds.push({name:object.name,minY:box.min.y,maxY:box.max.y})}});const meshMinY=Math.min(...meshBounds.map(item=>item.minY));return{meshBounds,ready,"
           if old not in text:
               raise SystemExit('PRECISE_BOUND_PATTERN_NOT_FOUND')
           source.write_text(text.replace(old, new, 1))
