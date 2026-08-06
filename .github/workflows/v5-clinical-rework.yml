@@ -15,7 +15,7 @@ jobs:
           ref: agent/human-v4-quaternius
       - name: Report precise bounds by skinned sub-mesh
         run: |
-          python3 -c "from pathlib import Path; p=Path('src/app-v4.js'); s=p.read_text(); old='const meshMinY=new THREE.Box3().setFromObject(model).min.y;return{ready:'; new='const meshBounds=[];model.traverse(object=>{if(object.isMesh){const box=new THREE.Box3().setFromObject(object,true);meshBounds.push({name:object.name,minY:box.min.y,maxY:box.max.y})}});const meshMinY=Math.min(...meshBounds.map(item=>item.minY));return{meshBounds,ready:'; assert old in s; p.write_text(s.replace(old,new,1))"
+          python3 -c "from pathlib import Path; p=Path('src/app-v4.js'); s=p.read_text(); old='const meshMinY=new THREE.Box3().setFromObject(model,true).min.y;return{ready:'; new='const meshBounds=[];model.traverse(object=>{if(object.isMesh){const box=new THREE.Box3().setFromObject(object,true);meshBounds.push({name:object.name,minY:box.min.y,maxY:box.max.y})}});const meshMinY=Math.min(...meshBounds.map(item=>item.minY));return{meshBounds,ready:'; assert old in s; p.write_text(s.replace(old,new,1))"
           python3 -c "from pathlib import Path; p=Path('qa/v4-browser.mjs'); s=p.read_text(); s=s.replace('Knee-support mesh is not on the floor: ${kneeDiagnostics.meshMinY}','Knee-support mesh is not on the floor: ${kneeDiagnostics.meshMinY} ${JSON.stringify(kneeDiagnostics.meshBounds)}').replace('Toe-support mesh is not grounded: ${toeGroundError}','Toe-support mesh is not grounded: ${toeGroundError} ${JSON.stringify(toeDiagnostics.meshBounds)}'); p.write_text(s)"
           git config user.name epaule-v5-qa
           git config user.email 104558808+stefm78@users.noreply.github.com
