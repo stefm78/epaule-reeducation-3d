@@ -1,4 +1,4 @@
-name: Correct V5 physical contact QA
+name: Use precise skinned contact bounds
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -13,38 +13,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/human-v4-quaternius
-      - name: Test physical mesh contact rather than bone-centre height
+      - name: Compute the deformed mesh bounds in QA diagnostics
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          path=Path('qa/v4-browser.mjs')
-          text=path.read_text()
-          old="""const kneeGroundError = maximumAbsolute(
-  kneeDiagnostics.joints.calf_l[1] - 0.025,
-  kneeDiagnostics.joints.calf_r[1] - 0.025,
-  kneeDiagnostics.joints.middle_01_l[1] - 0.018,
-  kneeDiagnostics.joints.middle_01_r[1] - 0.018
-);
-const toeGroundError = maximumAbsolute(
-  toeDiagnostics.joints.ball_l[1] - 0.025,
-  toeDiagnostics.joints.ball_r[1] - 0.025,
-  toeDiagnostics.joints.middle_01_l[1] - 0.018,
-  toeDiagnostics.joints.middle_01_r[1] - 0.018
-);"""
-          new="""const kneeGroundError = maximumAbsolute(
-  kneeDiagnostics.joints.calf_l[1] - 0.025,
-  kneeDiagnostics.joints.calf_r[1] - 0.025
-);
-const toeGroundError = Math.abs(toeDiagnostics.meshMinY);"""
-          if old not in text: raise SystemExit('GROUND_ERROR_BLOCK_NOT_FOUND')
-          text=text.replace(old,new,1)
-          old_test="if (toeGroundError > 0.07) throw new Error(`Toe support is not grounded: ${toeGroundError}`);"
-          new_test="if (toeGroundError > 0.07) throw new Error(`Toe-support mesh is not grounded: ${toeGroundError}`);"
-          if old_test not in text: raise SystemExit('TOE_TEST_NOT_FOUND')
-          path.write_text(text.replace(old_test,new_test,1))
-          PY
+          python3 -c "from pathlib import Path; p=Path('src/app-v4.js'); s=p.read_text(); old='new THREE.Box3().setFromObject(model).min.y'; assert old in s; p.write_text(s.replace(old,'new THREE.Box3().setFromObject(model,true).min.y',1))"
           git config user.name epaule-v5-qa
           git config user.email 104558808+stefm78@users.noreply.github.com
-          git add qa/v4-browser.mjs
-          git commit -m 'test: validate physical mesh floor contact'
+          git add src/app-v4.js
+          git commit -m 'test: use precise skinned mesh contact bounds'
           git push origin HEAD:agent/human-v4-quaternius
