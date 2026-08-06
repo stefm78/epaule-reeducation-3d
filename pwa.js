@@ -1,6 +1,24 @@
 (() => {
+  const SW_VERSION = 'v6-cache-migration-1';
+  const reloadKey = `epaule-sw-reload-${SW_VERSION}`;
+
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (sessionStorage.getItem(reloadKey) === '1') return;
+      sessionStorage.setItem(reloadKey, '1');
+      window.location.reload();
+    });
+
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register(`./sw.js?${SW_VERSION}`, {
+          updateViaCache: 'none'
+        });
+        await registration.update();
+      } catch (error) {
+        console.error('Service worker registration failed', error);
+      }
+    });
   }
 
   const button = document.getElementById('installAppButton');
