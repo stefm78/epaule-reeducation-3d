@@ -20,4 +20,4 @@ Ouvrir la page GitHub Pages dans Chrome, puis choisir **Installer l’applicatio
 
 ## Actif 3D
 
-Modèle masculin aux proportions neutres issu de **Universal Base Characters** par Quaternius, licence CC0 1.0 Universal.
+Le corps complet riggé est issu de **Universal Base Characters** par Quaternius, licence CC0 1.0 Universal. L’actif gratuit disponible est la morphologie complète Superhero ; son matériau, son relief et ses proportions sont neutralisés dans l’application afin d’obtenir un rendu moins musclé, sans introduire un actif payant ou non redistribuable.
