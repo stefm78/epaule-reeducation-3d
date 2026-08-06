@@ -37,11 +37,8 @@ jobs:
               page.wait_for_url('**/download/**',timeout=120000)
               page.wait_for_timeout(1800)
               buttons=page.locator('.download_btn:visible')
-              if buttons.count()==0:
-                  Path('/tmp/qv5/download-page.html').write_text(page.content())
-                  raise SystemExit('NO_VISIBLE_DOWNLOAD_BUTTON')
-              with page.expect_download(timeout=180000) as info:
-                  buttons.first.click(force=True)
+              if buttons.count()==0: raise SystemExit('NO_VISIBLE_DOWNLOAD_BUTTON')
+              with page.expect_download(timeout=180000) as info: buttons.first.click(force=True)
               info.value.save_as(str(out))
               browser.close()
           PY
@@ -51,14 +48,15 @@ jobs:
           from pathlib import Path
           import json, shutil
           root=Path('/tmp/qv5/unpacked')
+          all_models=list(root.rglob('*.gltf'))
           candidates=[]
-          for p in root.rglob('*.gltf'):
+          for p in all_models:
               n=p.name.lower()
-              if 'regular' in n and 'male' in n and 'female' not in n and 'fullbody' in n:
+              if 'male' in n and 'female' not in n and 'fullbody' in n and 'superhero' not in n and 'teen' not in n:
                   candidates.append(p)
           if not candidates:
-              names='\n'.join(sorted(str(p.relative_to(root)) for p in root.rglob('*.gltf') if 'regular' in p.name.lower()))
-              raise SystemExit('REGULAR_MALE_FULLBODY_NOT_FOUND\n'+names)
+              names='\n'.join(sorted(str(p.relative_to(root)) for p in all_models if 'male' in p.name.lower() or 'fullbody' in p.name.lower() or 'body' in p.name.lower()))
+              raise SystemExit('NEUTRAL_MALE_FULLBODY_NOT_FOUND\n'+names)
           candidates.sort(key=lambda p:(0 if 'godot - ue' in str(p).lower() else 1,len(str(p))))
           src=candidates[0]
           data=json.loads(src.read_text())
@@ -77,10 +75,10 @@ jobs:
                       dest.parent.mkdir(parents=True,exist_ok=True)
                       shutil.copy2(source,dest)
                       copied.append(uri)
-          (out/'LICENSE.md').write_text('Universal Base Characters by Quaternius — CC0 1.0 Universal.\nSelected neutral-proportion asset: Regular male full body.\n')
+          (out/'LICENSE.md').write_text('Universal Base Characters by Quaternius — CC0 1.0 Universal.\nSelected neutral-proportion male full-body asset (non-Superhero, non-Teen).\n')
           Path('research').mkdir(exist_ok=True)
           Path('research/v5-neutral-body.json').write_text(json.dumps({'source':str(src.relative_to(root)),'dependencies':copied},indent=2))
-          print(src)
+          print('SELECTED',src)
           PY
       - name: Commit neutral body
         run: |
