@@ -1,4 +1,4 @@
-name: V4 product build and QA
+name: V5 clinical product build and QA
 on:
   push:
     branches: [agent/human-v4-quaternius]
@@ -44,21 +44,21 @@ jobs:
           cp icons/icon-192.png icons/icon-512.png icons/icon.svg candidate/icons/
           cp assets/quaternius/fullbody/* candidate/assets/quaternius/fullbody/
           cat > candidate/sw.js <<'EOF'
-          const CACHE='epaule-v4-human-1';
-          const CORE=['./','./index.html','./styles-v4.css','./app-v4.bundle.js','./pwa.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./assets/quaternius/fullbody/Superhero_Male_FullBody.gltf','./assets/quaternius/fullbody/Superhero_Male_FullBody.bin','./assets/quaternius/fullbody/T_Eye_Brown.png','./assets/quaternius/fullbody/T_Eye_Normal_png.png','./assets/quaternius/fullbody/T_Hair_1_BaseColor.png','./assets/quaternius/fullbody/T_Hair_1_Normal_png.png','./assets/quaternius/fullbody/T_Superhero_Male_Dark.png','./assets/quaternius/fullbody/T_Superhero_Male_Normal.png','./assets/quaternius/fullbody/T_Superhero_Male_Roughness.png'];
-          self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)));self.skipWaiting()});
-          self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
-          self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match('./index.html'))))});
+          const CACHE='epaule-v5-clinical-1';
+          const SHELL=['./','./index.html','./styles-v4.css','./app-v4.bundle.js','./pwa.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png'];
+          self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)));self.skipWaiting()});
+          self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim()});
+          self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response}).catch(()=>caches.match('./index.html'))))});
           EOF
           test -s candidate/app-v4.bundle.js
-          test -s candidate/assets/quaternius/fullbody/Superhero_Male_FullBody.gltf
+          test -s candidate/assets/quaternius/fullbody/Regular_Male_FullBody.gltf
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Browser QA
+      - name: Browser and biomechanical QA
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory candidate > /tmp/v4-server.log 2>&1 &
+          python3 -m http.server 4173 --directory candidate > /tmp/v5-server.log 2>&1 &
           SERVER_PID=$!
           trap 'kill $SERVER_PID || true' EXIT
           for i in {1..30}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 1; done
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: v4-product-evidence
+          name: v5-clinical-product-evidence
           path: |
             candidate
             qa-output
