@@ -1,42 +1,196 @@
 import * as THREE from 'three';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-const EX=[
-{id:'clap',title:'Pompes dynamiques à genoux',cat:'Activation en charge',summary:'Descente contrôlée, poussée vive, bref allègement des mains puis réception souple.',steps:['Aligner le tronc des genoux aux épaules.','Descendre en fléchissant les coudes.','Repousser rapidement sans perdre le contrôle.','Réceptionner avec les coudes souples.'],cues:['Épaules loin des oreilles.','Bassin stable.','Aucun effondrement de l’épaule gauche.'],dose:[3,6,'Poids du corps'],muscles:[['Triceps',3],['Pectoral',3],['Dentelé',2],['Coiffe',1]]},
-{id:'shift',title:'Balanciers droite–gauche',cat:'Stabilité en appui',summary:'Transférer progressivement le poids d’une main vers l’autre sans tourner le bassin.',steps:['Prendre la position de pompe à genoux.','Déplacer le thorax vers la droite.','Revenir au centre.','Transférer vers la gauche.'],cues:['Mains fixes.','Mouvement lent.','Tronc et bassin solidaires.'],dose:[3,10,'Poids du corps'],muscles:[['Coiffe',3],['Dentelé',3],['Trapèze',2],['Tronc',2]]},
-{id:'supine',title:'Rotations allongées en 90/90',cat:'Coiffe des rotateurs',summary:'Bras ouverts et coudes fléchis, descendre les avant-bras avec retenue puis remonter sans déplacer les coudes.',steps:['S’allonger, bras ouverts à 90°.','Garder les coudes fléchis à 90°.','Descendre lentement les avant-bras.','Remonter de façon vive mais contrôlée.'],cues:['Côtes stables.','Coudes fixes.','Ne pas forcer la fin d’amplitude.'],dose:[3,12,'1,5 kg / main'],muscles:[['Infra-épineux',3],['Coiffe',3],['Petit rond',2],['Omoplate',1]]},
-{id:'airplane',title:'L’avion en quadrupédie',cat:'Stabilité scapulaire',summary:'À quatre pattes, décoller le bras gauche latéralement comme une aile, sans tourner le bassin ni relever le menton.',steps:['Placer les mains sous les épaules et les genoux sous les hanches.','Rentrer légèrement le menton et garder le dos neutre.','Lever le bras gauche latéralement, coude presque tendu.','Revenir lentement sous l’épaule.'],cues:['Bassin parallèle au sol.','Épaule gauche loin de l’oreille.','Amplitude sans rotation forcée du thorax.'],dose:[3,10,'Sans charge'],muscles:[['Deltoïde',3],['Trapèze moyen',2],['Rhomboïdes',2],['Coiffe',2]]},
-{id:'dive',title:'Pompe plongeante arrière–avant',cat:'Amplitude en charge',summary:'Reculer, passer le menton près du sol, avancer les épaules au-delà des mains, remonter puis revenir.',steps:['Épaules en retrait des mains.','Descendre le menton au ras du sol.','Glisser vers l’avant, épaules au-delà des mains.','Tendre les bras et remonter.','Revenir à quatre pattes.'],cues:['Trajectoire fluide.','Menton rentré.','Mains et genoux restent en appui.'],dose:[3,8,'Poids du corps'],muscles:[['Triceps',3],['Dentelé',3],['Pectoral',2],['Coiffe',2]]},
-{id:'row',title:'Tirage puis extension du triceps',cat:'Dos et bras',summary:'À quatre pattes, remonter le coude gauche puis tendre l’avant-bras vers l’arrière.',steps:['Stabiliser l’appui droit et les genoux.','Tirer le coude gauche près du tronc.','Maintenir le bras.','Tendre le coude vers l’arrière.','Revenir lentement.'],cues:['Dos neutre.','Pas de rotation du bassin.','Pas d’élan.'],dose:[3,10,'1,5 kg gauche'],muscles:[['Triceps',3],['Rhomboïdes',3],['Trapèze moyen',2],['Deltoïde postérieur',2]]},
-{id:'rotate',title:'Rotation externe bras relevé',cat:'Rotation et contrôle',summary:'Bras gauche à hauteur d’épaule, coude fléchi : relever l’avant-bras puis redescendre avec retenue.',steps:['Stabiliser la position quadrupédique.','Élever le coude gauche sur le côté.','Faire pivoter l’avant-bras vers le haut.','Redescendre lentement.'],cues:['Humérus stable.','Épaule loin de l’oreille.','Thorax peu mobile.'],dose:[3,10,'1,5 kg gauche'],muscles:[['Infra-épineux',3],['Petit rond',3],['Coiffe',2],['Trapèze inférieur',1]]},
-{id:'reach',title:'Projection du bras vers l’avant',cat:'Coordination scapulo-humérale',summary:'Depuis quatre pattes, allonger le bras gauche dans le prolongement du corps puis revenir sous l’épaule.',steps:['Menton rentré et dos neutre.','Décoller la main gauche.','Allonger le bras près de la tête.','Revenir lentement.'],cues:['Bassin parallèle au sol.','Pas de haussement d’épaule.','Trajectoire continue.'],dose:[3,10,'Selon consigne'],muscles:[['Dentelé',3],['Deltoïde antérieur',2],['Trapèze inférieur',2],['Coiffe',2]]}
+const EXERCISES = [
+  {
+    id: 'supine',
+    title: 'Rotation externe allongée en 90/90',
+    category: 'Coiffe des rotateurs · Base',
+    summary: 'Contrôle actif de la rotation externe, sans chercher la fin d’amplitude et sans déplacer les coudes.',
+    steps: [
+      'S’allonger avec le haut du dos confortablement soutenu.',
+      'Placer les bras ouverts et les coudes fléchis à environ 90°.',
+      'Descendre les avant-bras lentement dans une amplitude confortable.',
+      'Revenir sans décoller les coudes ni cambrer le thorax.'
+    ],
+    cues: ['Respiration libre.', 'Coudes stables.', 'Aucune douleur vive ni compensation du tronc.'],
+    dose: [2, 8, 'Selon prescription'],
+    muscles: [['Infra-épineux', 3], ['Petit rond', 3], ['Coiffe', 2], ['Stabilisateurs scapulaires', 1]]
+  },
+  {
+    id: 'reach',
+    title: 'Projection contrôlée du bras vers l’avant',
+    category: 'Contrôle scapulo-huméral · Base',
+    summary: 'Depuis la quadrupédie, allonger le bras gauche sans haussement d’épaule ni rotation du bassin.',
+    steps: [
+      'Placer les mains sous les épaules et les genoux sous les hanches.',
+      'Garder le cou long et le tronc stable.',
+      'Allonger le bras gauche progressivement dans l’axe du corps.',
+      'Revenir lentement sous l’épaule.'
+    ],
+    cues: ['Bassin horizontal.', 'Épaule loin de l’oreille.', 'Mouvement lent et continu.'],
+    dose: [2, 8, 'Sans charge puis progression'],
+    muscles: [['Dentelé antérieur', 3], ['Deltoïde antérieur', 2], ['Trapèze inférieur', 2], ['Coiffe', 2]]
+  },
+  {
+    id: 'airplane',
+    title: 'L’avion en quadrupédie',
+    category: 'Contrôle scapulaire · Base',
+    summary: 'Lever le bras gauche latéralement avec une amplitude maîtrisée, sans ouvrir le bassin.',
+    steps: [
+      'Stabiliser la quadrupédie et rentrer légèrement le menton.',
+      'Décoller la main gauche sans déplacer le tronc.',
+      'Lever le bras latéralement comme une aile, coude souple.',
+      'Revenir lentement à l’appui.'
+    ],
+    cues: ['Bassin parallèle au sol.', 'Pas de haussement d’épaule.', 'Amplitude limitée par la qualité du contrôle.'],
+    dose: [2, 8, 'Sans charge puis progression'],
+    muscles: [['Deltoïde postérieur', 3], ['Trapèze moyen', 2], ['Rhomboïdes', 2], ['Coiffe', 2]]
+  },
+  {
+    id: 'row',
+    title: 'Tirage puis extension du triceps',
+    category: 'Chaîne postérieure · Intermédiaire',
+    summary: 'Associer un tirage contrôlé du coude à une extension du bras, sans rotation du tronc.',
+    steps: [
+      'Stabiliser les trois appuis au sol.',
+      'Ramener le coude gauche près du tronc.',
+      'Maintenir le bras sans avancer l’épaule.',
+      'Tendre l’avant-bras vers l’arrière puis revenir lentement.'
+    ],
+    cues: ['Dos neutre.', 'Pas d’élan.', 'Charge compatible avec une omoplate stable.'],
+    dose: [2, 8, 'Selon prescription'],
+    muscles: [['Triceps', 3], ['Rhomboïdes', 3], ['Trapèze moyen', 2], ['Deltoïde postérieur', 2]]
+  },
+  {
+    id: 'rotate',
+    title: 'Rotation externe bras relevé',
+    category: 'Coiffe en élévation · Intermédiaire',
+    summary: 'Faire pivoter l’avant-bras autour d’un humérus stable, sans forcer l’amplitude.',
+    steps: [
+      'Stabiliser le tronc en quadrupédie.',
+      'Élever le coude gauche à une hauteur confortable.',
+      'Faire pivoter l’avant-bras vers le haut.',
+      'Redescendre lentement sans laisser tomber le coude.'
+    ],
+    cues: ['Humérus stable.', 'Épaule basse.', 'Arrêt avant toute compensation du thorax.'],
+    dose: [2, 8, 'Selon prescription'],
+    muscles: [['Infra-épineux', 3], ['Petit rond', 3], ['Coiffe', 2], ['Trapèze inférieur', 1]]
+  },
+  {
+    id: 'shift',
+    title: 'Transferts de poids droite–gauche',
+    category: 'Appui fermé · Progression',
+    summary: 'Transférer progressivement la charge d’une main vers l’autre en gardant le tronc solidaire.',
+    steps: [
+      'Choisir l’appui sur les genoux ou sur les pointes de pieds.',
+      'Aligner le tronc et stabiliser les omoplates.',
+      'Déplacer lentement le thorax vers une main.',
+      'Revenir au centre puis transférer vers l’autre côté.'
+    ],
+    cues: ['Mains fixes.', 'Amplitude progressive.', 'Pas d’effondrement de l’épaule gauche.'],
+    dose: [2, 8, 'Poids du corps'],
+    muscles: [['Dentelé antérieur', 3], ['Coiffe', 3], ['Trapèze', 2], ['Tronc', 2]],
+    push: true
+  },
+  {
+    id: 'clap',
+    title: 'Pompe dynamique',
+    category: 'Pliométrie · Avancé',
+    summary: 'Exercice à forte demande mécanique, proposé seulement après validation clinique explicite.',
+    steps: [
+      'Choisir la variante sur les genoux ou sur les pointes de pieds.',
+      'Descendre avec les coudes souples et les omoplates contrôlées.',
+      'Repousser rapidement pour alléger brièvement les mains.',
+      'Réceptionner avec les coudes fléchis puis stabiliser.'
+    ],
+    cues: ['Aucune douleur.', 'Réception silencieuse.', 'Arrêter si l’épaule perd son contrôle.'],
+    dose: [2, 5, 'Après validation du kiné'],
+    muscles: [['Triceps', 3], ['Pectoral', 3], ['Dentelé antérieur', 2], ['Coiffe', 2]],
+    push: true,
+    advanced: true
+  },
+  {
+    id: 'dive',
+    title: 'Pompe plongeante arrière–avant',
+    category: 'Amplitude en charge · Avancé',
+    summary: 'Trajectoire continue en appui, à conserver seulement si elle correspond à l’objectif clinique fixé par le kiné.',
+    steps: [
+      'Choisir l’appui sur les genoux ou sur les pointes de pieds.',
+      'Reculer légèrement les épaules en gardant les mains fixes.',
+      'Descendre le thorax et le menton près du sol sans rupture.',
+      'Faire progresser les épaules au-delà des mains.',
+      'Repousser puis revenir par la même trajectoire contrôlée.'
+    ],
+    cues: ['Trajectoire continue.', 'Quatre appuis stables.', 'Aucune douleur ni pincement antérieur.'],
+    dose: [2, 6, 'Après validation du kiné'],
+    muscles: [['Dentelé antérieur', 3], ['Triceps', 3], ['Pectoral', 2], ['Coiffe', 2]],
+    push: true,
+    advanced: true
+  }
 ];
-const $=s=>document.querySelector(s), ui={list:$('#exerciseList'),title:$('#title'),num:$('#num'),cat:$('#category'),summary:$('#summary'),steps:$('#steps'),cues:$('#cues'),chips:$('#chips'),sets:$('#sets'),reps:$('#reps'),load:$('#load'),play:$('#play'),speed:$('#speed'),timeline:$('#timeline'),phase:$('#phase'),time:$('#time'),muscles:$('#muscles'),sequence:$('#sequence')};
-let current=0,t=0,playing=true,auto=false,showMuscles=false,ready=false,last=performance.now();
-function renderInfo(){const e=EX[current];ui.list.innerHTML=EX.map((x,n)=>`<button class="exercise ${n===current?'active':''}" data-n="${n}"><span class="n">${String(n+1).padStart(2,'0')}</span><span><strong>${x.title}</strong><small>${x.cat}</small></span></button>`).join('');ui.list.querySelectorAll('button').forEach(b=>b.onclick=()=>{current=+b.dataset.n;t=0;renderInfo()});ui.num.textContent=String(current+1).padStart(2,'0');ui.title.textContent=e.title;ui.cat.textContent=e.cat;ui.summary.textContent=e.summary;ui.steps.innerHTML=e.steps.map(x=>`<li>${x}</li>`).join('');ui.cues.innerHTML=e.cues.map(x=>`<li>${x}</li>`).join('');ui.chips.innerHTML=e.muscles.map(x=>`<span class="chip ${x[1]===3?'p':x[1]===2?'s':'t'}">${x[0]}</span>`).join('');[ui.sets.value,ui.reps.value,ui.load.value]=e.dose;frameCurrent()}
 
-function frameCurrent(){const id=EX[current].id;if(id==='supine'){camera.position.set(4.8,2.8,-.45);controls.target.set(0,.42,-.35)}else if(id==='airplane'){camera.position.set(1.2,2.25,-4.25);controls.target.set(0,.58,.68)}else if(id==='dive'){camera.position.set(5.4,2.35,.95);controls.target.set(0,.52,.62)}else{camera.position.set(4.4,2.15,.95);controls.target.set(0,.58,.82)}controls.update()}
+const PRUDENT_SEQUENCE = EXERCISES.map((exercise, index) => exercise.advanced ? null : index).filter(index => index !== null);
+const $ = selector => document.querySelector(selector);
+const ui = {
+  list: $('#exerciseList'), title: $('#title'), num: $('#num'), category: $('#category'), level: $('#level'),
+  summary: $('#summary'), steps: $('#steps'), cues: $('#cues'), chips: $('#chips'), sets: $('#sets'),
+  reps: $('#reps'), load: $('#load'), play: $('#play'), speed: $('#speed'), timeline: $('#timeline'),
+  phase: $('#phase'), time: $('#time'), muscles: $('#muscles'), sequence: $('#sequence'),
+  supportControl: $('#supportControl'), supportButtons: [...document.querySelectorAll('[data-support]')],
+  supportNote: $('#supportNote')
+};
 
-const host=$('#viewer'),scene=new THREE.Scene();scene.background=new THREE.Color(0xcadbd7);scene.fog=new THREE.Fog(0xcadbd7,6,11);
-const camera=new THREE.PerspectiveCamera(38,1,.01,30);camera.position.set(5.0,2.4,.5);
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;host.prepend(renderer.domElement);
-const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,.62,.25);controls.enableDamping=true;controls.minDistance=2.2;controls.maxDistance=8;renderInfo();
-scene.add(new THREE.HemisphereLight(0xf5fffd,0x36514c,2.3));const key=new THREE.DirectionalLight(0xffffff,3.2);key.position.set(3,5,2);key.castShadow=true;scene.add(key);const rim=new THREE.DirectionalLight(0x9eeadd,1.8);rim.position.set(-3,2,-3);scene.add(rim);
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(12,12),new THREE.MeshStandardMaterial({color:0x9eb5b0,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
-const pivot=new THREE.Group();scene.add(pivot);let model,bones={},rest=new Map(),baseScale=1;
-const overlayGroup=new THREE.Group();scene.add(overlayGroup);const overlay={};[['shoulder',0xe93c2d,.11],['arm',0xe93c2d,.09],['chest',0xf18a34,.11],['scapula',0xf2c54e,.10]].forEach(([n,c,r])=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,28,18),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.30,depthWrite:false,blending:THREE.AdditiveBlending}));overlay[n]=m;overlayGroup.add(m)});
+let current = 0, t = 0, playing = true, autoSequence = false, sequencePosition = 0;
+let showMuscles = false, ready = false, last = performance.now(), supportMode = 'knees';
+
+const host = $('#viewer'), scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcadbd7); scene.fog = new THREE.Fog(0xcadbd7, 6, 11);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.01, 30); camera.position.set(4.5, 2.35, 0.8);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.shadowMap.enabled = true;
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05; host.prepend(renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.62, 0.55); controls.enableDamping = true; controls.enablePan = false;
+controls.minDistance = 2.8; controls.maxDistance = 6.2; controls.minPolarAngle = 0.42;
+controls.maxPolarAngle = 1.48; controls.rotateSpeed = 0.55; controls.zoomSpeed = 0.65;
+
+scene.add(new THREE.HemisphereLight(0xf5fffd, 0x36514c, 2.3));
+const key = new THREE.DirectionalLight(0xffffff, 3.2); key.position.set(3, 5, 2); key.castShadow = true; scene.add(key);
+const rim = new THREE.DirectionalLight(0x9eeadd, 1.8); rim.position.set(-3, 2, -3); scene.add(rim);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), new THREE.MeshStandardMaterial({ color: 0x9eb5b0, roughness: 0.92 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const pivot = new THREE.Group(); scene.add(pivot); let model; const bones = {}, rest = new Map();
+const overlayGroup = new THREE.Group(); scene.add(overlayGroup); const overlay = {};
+[['shoulder',0xe93c2d,.105],['arm',0xe93c2d,.082],['chest',0xf18a34,.095],['scapula',0xf2c54e,.09]].forEach(([name,color,radius])=>{
+  const mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,24,16),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.28,depthWrite:false,blending:THREE.AdditiveBlending}));
+  overlay[name]=mesh; overlayGroup.add(mesh);
+});
 const V=(x,y,z)=>new THREE.Vector3(x,y,z),q0=new THREE.Quaternion(),q1=new THREE.Quaternion(),q2=new THREE.Quaternion(),v0=new THREE.Vector3(),v1=new THREE.Vector3();
-function wp(name){return bones[name].getWorldPosition(new THREE.Vector3())}
-function resetPose(){if(!model)return;for(const [n,r] of rest){const b=bones[n];b.position.copy(r.p);b.quaternion.copy(r.q);b.scale.copy(r.s)}pivot.position.set(0,0,0);pivot.rotation.set(0,0,0);pivot.scale.setScalar(1);model.updateMatrixWorld(true)}
-function aim(name,child,target){const b=bones[name],c=bones[child];if(!b||!c)return;b.updateWorldMatrix(true,false);c.updateWorldMatrix(true,false);const bp=b.getWorldPosition(v0),cp=c.getWorldPosition(v1);const from=cp.clone().sub(bp).normalize(),to=target.clone().sub(bp).normalize();if(from.lengthSq()<.5||to.lengthSq()<.5)return;const delta=q0.setFromUnitVectors(from,to);const world=b.getWorldQuaternion(q1);const parent=b.parent.getWorldQuaternion(q2).invert();b.quaternion.copy(parent.multiply(delta.multiply(world)));b.updateWorldMatrix(true,true)}
-function support({y=.72,z=0,x=0,bend=.08,left=null,knees=true,handLift=0,handX=.27}){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(x,y,z);model.updateMatrixWorld(true);const sl=wp('upperarm_l'),sr=wp('upperarm_r'),hl=wp('thigh_l'),hr=wp('thigh_r');const handL=V(handX,.025+handLift,1.66),handR=V(-handX,.025+handLift,1.66);const elbowL=sl.clone().lerp(handL,.52).add(V(.16*bend,.05,0)),elbowR=sr.clone().lerp(handR,.52).add(V(-.16*bend,.05,0));if(left){aim('upperarm_l','lowerarm_l',left.elbow);aim('lowerarm_l','hand_l',left.wrist)}else{aim('upperarm_l','lowerarm_l',elbowL);aim('lowerarm_l','hand_l',handL);aim('hand_l','middle_01_l',handL.clone().add(V(0,0,.22)))}aim('upperarm_r','lowerarm_r',elbowR);aim('lowerarm_r','hand_r',handR);aim('hand_r','middle_01_r',handR.clone().add(V(0,0,.22)));if(knees){const kl=V(hl.x,.045,.82),kr=V(hr.x,.045,.82),fl=V(hl.x,.055,.30),fr=V(hr.x,.055,.30);aim('thigh_l','calf_l',kl);aim('calf_l','foot_l',fl);aim('thigh_r','calf_r',kr);aim('calf_r','foot_r',fr);aim('foot_l','ball_l',fl.clone().add(V(0,-.01,-.18)));aim('foot_r','ball_r',fr.clone().add(V(0,-.01,-.18)))}model.updateMatrixWorld(true)}
-function leanTorso(a){if(!a)return;model.updateMatrixWorld(true);let p=wp('spine_01');aim('spine_01','spine_02',p.clone().add(V(0,-.16*a,.22*a)));model.updateMatrixWorld(true);p=wp('spine_02');aim('spine_02','spine_03',p.clone().add(V(0,-.14*a,.24*a)));model.updateMatrixWorld(true)}
-function groundHands(bend=.5){model.updateMatrixWorld(true);const sl=wp('upperarm_l'),sr=wp('upperarm_r'),hl=V(.27,.025,1.66),hr=V(-.27,.025,1.66),el=sl.clone().lerp(hl,.52).add(V(.16*bend,.05,0)),er=sr.clone().lerp(hr,.52).add(V(-.16*bend,.05,0));aim('upperarm_l','lowerarm_l',el);aim('lowerarm_l','hand_l',hl);aim('hand_l','middle_01_l',hl.clone().add(V(0,0,.22)));aim('upperarm_r','lowerarm_r',er);aim('lowerarm_r','hand_r',hr);aim('hand_r','middle_01_r',hr.clone().add(V(0,0,.22)));model.updateMatrixWorld(true)}
-function supine(q){resetPose();pivot.rotation.x=-Math.PI/2;pivot.position.set(0,.18,-.1);model.updateMatrixWorld(true);for(const side of ['l','r']){const sg=side==='l'?1:-1,sh=wp('upperarm_'+side);const el=V(sg*.76,.25,sh.z),wr=V(sg*.76,.25+.5*(1-q),sh.z-.34*q);aim('upperarm_'+side,'lowerarm_'+side,el);aim('lowerarm_'+side,'hand_'+side,wr)}model.updateMatrixWorld(true)}
-function pose(ex,u){const wave=(1-Math.cos(u*Math.PI*2))/2;if(ex.id==='clap'){let y=.74,b=.08,h=0,hx=.27;if(u<.30){const a=(1-Math.cos(u/.30*Math.PI))/2;y=.74-.30*a;b=.08+.58*a}else if(u<.50){const a=(1-Math.cos((u-.30)/.20*Math.PI))/2;y=.44+.37*a;b=.66*(1-a);h=.14*a;hx=.27-.20*a}else if(u<.68){const a=(1-Math.cos((u-.50)/.18*Math.PI))/2;y=.81-.07*a;b=.10*a;h=.14*(1-a);hx=.07+.20*a}else{const a=(1-Math.cos((u-.68)/.32*Math.PI))/2;y=.74;b=.10*(1-a)}support({y,bend:b,handLift:h,handX:hx})}else if(ex.id==='shift'){support({x:Math.sin(u*Math.PI*2)*.19,bend:.14})}else if(ex.id==='supine'){supine(wave)}else if(ex.id==='airplane'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const sh=wp('upperarm_l'),sg=sh.x>0?1:-1,el=sh.clone().add(V(.42*sg,.08*wave,.02)),wr=sh.clone().add(V(.82*sg,.10*wave,.04));support({left:{elbow:el,wrist:wr},bend:.08})}else if(ex.id==='dive'){let y,z,b;if(u<.15){const a=u/.15;y=.72;z=-.08+.03*a;b=.08;var lean=.08*a}else if(u<.34){const a=(u-.15)/.19;y=.72-.18*a;z=-.05+.08*a;b=.08+.68*a;var lean=.08+.92*a}else if(u<.60){const a=(u-.34)/.26;y=.54;z=.03+.14*a;b=.76;var lean=1+.18*a}else if(u<.80){const a=(u-.60)/.20;y=.54+.18*a;z=.17;b=.76*(1-a);var lean=1.18*(1-a)}else{const a=(u-.80)/.20;y=.72;z=.17-.25*a;b=.08;var lean=0}support({y,z,bend:b});leanTorso(lean);groundHands(b)}else if(ex.id==='row'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const sh=wp('upperarm_l'),sg=sh.x>0?1:-1;if(u<.52){const a=(1-Math.cos(u/.52*Math.PI))/2;support({left:{elbow:sh.clone().add(V(.26*sg,.18*a,-.12)),wrist:sh.clone().add(V(.12*sg,-.08+.22*a,-.20))},bend:.1})}else{const a=(1-Math.cos((u-.52)/.48*Math.PI))/2;support({left:{elbow:sh.clone().add(V(.26*sg,.18,-.12)),wrist:sh.clone().add(V(.12*sg,.11,-.20-.62*a))},bend:.1})}}else if(ex.id==='rotate'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const sh=wp('upperarm_l'),sg=sh.x>0?1:-1,el=sh.clone().add(V(.48*sg,.03,.02)),wr=el.clone().add(V(0,.08+.48*wave,.28*(1-wave)));support({left:{elbow:el,wrist:wr},bend:.1})}else if(ex.id==='reach'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const sh=wp('upperarm_l'),sg=sh.x>0?1:-1,el=sh.clone().add(V(.04*sg,.02,.38*wave)),wr=sh.clone().add(V(.05*sg,.04,.82*wave));support({left:{elbow:el,wrist:wr},bend:.08})}updateOverlays(ex)}
-function updateOverlays(ex){if(!ready)return;overlayGroup.visible=showMuscles;const sh=wp('upperarm_l'),el=wp('lowerarm_l'),cl=wp('clavicle_l'),sp=wp('spine_03');overlay.shoulder.position.copy(sh);overlay.arm.position.copy(sh).lerp(el,.55);overlay.chest.position.copy(cl).add(V(-.06,-.06,.04));overlay.scapula.position.copy(sp).add(V(.16,.05,.05));const map={clap:[1,1,1,1],shift:[1,.65,.8,1],supine:[1,.8,.4,.8],dive:[1,1,1,1],row:[.75,1,.45,1],rotate:[1,.7,.35,.9],airplane:[1,.55,.4,.9],reach:[1,.45,.7,1]}[ex.id];const shapes=[[1.15,.55,1],[.55,1.5,.55],[1.45,.45,1],[1.3,.4,1.4]];Object.values(overlay).forEach((m,i)=>m.scale.set(shapes[i][0]*map[i],shapes[i][1]*map[i],shapes[i][2]*map[i]))}
-new GLTFLoader().load('assets/quaternius/fullbody/Superhero_Male_FullBody.gltf',g=>{model=g.scene;model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false}if(o.isBone)bones[o.name]=o});pivot.add(model);let box=new THREE.Box3().setFromObject(model),h=box.max.y-box.min.y;baseScale=2.0/h;model.scale.setScalar(baseScale);model.updateMatrixWorld(true);box.setFromObject(model);model.position.x-=((box.min.x+box.max.x)/2);model.position.y-=box.min.y;model.position.z-=((box.min.z+box.max.z)/2);model.updateMatrixWorld(true);for(const [n,b] of Object.entries(bones))rest.set(n,{p:b.position.clone(),q:b.quaternion.clone(),s:b.scale.clone()});ready=true;$('#loader').remove();document.documentElement.dataset.ready='true';pose(EX[current],t)},undefined,e=>{$('#loader').textContent='Échec du chargement du modèle';console.error(e)});
-function resize(){const r=host.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(host);resize();
-ui.play.onclick=()=>{playing=!playing;ui.play.textContent=playing?'Pause':'Lecture'};ui.timeline.oninput=()=>{t=+ui.timeline.value/1000;playing=false;ui.play.textContent='Lecture'};ui.muscles.onclick=()=>{showMuscles=!showMuscles;ui.muscles.classList.toggle('active',showMuscles)};ui.sequence.onclick=()=>{auto=!auto;ui.sequence.textContent=auto?'Arrêter':'Tout lire'};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{const v=b.dataset.view;if(v==='left')camera.position.set(3.8,2.1,-.5);if(v==='front')camera.position.set(0,2.4,-4);if(v==='back')camera.position.set(0,2.4,3.2);controls.target.set(0,.62,EX[current].id==='supine'?-.8:.8)});$('#resetView').onclick=frameCurrent;
-function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(playing){t+=dt*(+ui.speed.value||1)/5;if(t>=1){t%=1;if(auto){current=(current+1)%EX.length;renderInfo()}}ui.timeline.value=t*1000}if(ready)pose(EX[current],t);ui.phase.textContent=t<.12?'Position initiale':t<.42?'Mise en mouvement':t<.72?'Phase active':'Retour contrôlé';ui.time.textContent=(t*5).toFixed(1).replace('.',',')+' s';controls.update();renderer.render(scene,camera);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+const followBox=new THREE.Box3(),followCenter=new THREE.Vector3(),followDelta=new THREE.Vector3();
+function wp(name){return bones[name]?.getWorldPosition(new THREE.Vector3())??new THREE.Vector3()}
+function resetPose(){if(!model)return;for(const [name,value] of rest){const bone=bones[name];bone.position.copy(value.position);bone.quaternion.copy(value.quaternion);bone.scale.copy(value.scale)}pivot.position.set(0,0,0);pivot.rotation.set(0,0,0);pivot.scale.setScalar(1);model.updateMatrixWorld(true)}
+function aim(name,childName,target){const bone=bones[name],child=bones[childName];if(!bone||!child)return;bone.updateWorldMatrix(true,false);child.updateWorldMatrix(true,false);const bonePosition=bone.getWorldPosition(v0),childPosition=child.getWorldPosition(v1);const from=childPosition.clone().sub(bonePosition).normalize(),to=target.clone().sub(bonePosition).normalize();if(from.lengthSq()<.5||to.lengthSq()<.5)return;const delta=q0.setFromUnitVectors(from,to),world=bone.getWorldQuaternion(q1),parentInverse=bone.parent.getWorldQuaternion(q2).invert();bone.quaternion.copy(parentInverse.multiply(delta.multiply(world)));bone.updateWorldMatrix(true,true)}
+function support({y=.72,z=0,x=0,bend=.08,left=null,base='knees',handLift=0,handX=.27}){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(x,y+(base==='toes'?.08:0),z);model.updateMatrixWorld(true);const shoulderLeft=wp('upperarm_l'),shoulderRight=wp('upperarm_r'),hipLeft=wp('thigh_l'),hipRight=wp('thigh_r');const handLeft=V(handX,.025+handLift,1.66),handRight=V(-handX,.025+handLift,1.66);const elbowLeft=shoulderLeft.clone().lerp(handLeft,.52).add(V(.16*bend,.05,0)),elbowRight=shoulderRight.clone().lerp(handRight,.52).add(V(-.16*bend,.05,0));if(left){aim('upperarm_l','lowerarm_l',left.elbow);aim('lowerarm_l','hand_l',left.wrist)}else{aim('upperarm_l','lowerarm_l',elbowLeft);aim('lowerarm_l','hand_l',handLeft);aim('hand_l','middle_01_l',handLeft.clone().add(V(0,0,.22)))}aim('upperarm_r','lowerarm_r',elbowRight);aim('lowerarm_r','hand_r',handRight);aim('hand_r','middle_01_r',handRight.clone().add(V(0,0,.22)));if(base==='knees'){const kneeLeft=V(hipLeft.x,.045,.82),kneeRight=V(hipRight.x,.045,.82),ankleLeft=V(hipLeft.x,.055,.30),ankleRight=V(hipRight.x,.055,.30);aim('thigh_l','calf_l',kneeLeft);aim('calf_l','foot_l',ankleLeft);aim('thigh_r','calf_r',kneeRight);aim('calf_r','foot_r',ankleRight);aim('foot_l','ball_l',ankleLeft.clone().add(V(0,-.01,-.18)));aim('foot_r','ball_r',ankleRight.clone().add(V(0,-.01,-.18)))}else{const kneeLeft=V(hipLeft.x,.28,.34),kneeRight=V(hipRight.x,.28,.34),ankleLeft=V(hipLeft.x,.12,-.20),ankleRight=V(hipRight.x,.12,-.20),toeLeft=V(hipLeft.x,.025,-.49),toeRight=V(hipRight.x,.025,-.49);aim('thigh_l','calf_l',kneeLeft);aim('calf_l','foot_l',ankleLeft);aim('foot_l','ball_l',toeLeft);aim('thigh_r','calf_r',kneeRight);aim('calf_r','foot_r',ankleRight);aim('foot_r','ball_r',toeRight)}model.updateMatrixWorld(true)}
+function leanTorso(amount){if(!amount)return;model.updateMatrixWorld(true);let point=wp('spine_01');aim('spine_01','spine_02',point.clone().add(V(0,-.13*amount,.20*amount)));model.updateMatrixWorld(true);point=wp('spine_02');aim('spine_02','spine_03',point.clone().add(V(0,-.11*amount,.22*amount)));model.updateMatrixWorld(true)}
+function groundHands(bend=.5){model.updateMatrixWorld(true);const shoulderLeft=wp('upperarm_l'),shoulderRight=wp('upperarm_r'),handLeft=V(.27,.025,1.66),handRight=V(-.27,.025,1.66),elbowLeft=shoulderLeft.clone().lerp(handLeft,.52).add(V(.16*bend,.05,0)),elbowRight=shoulderRight.clone().lerp(handRight,.52).add(V(-.16*bend,.05,0));aim('upperarm_l','lowerarm_l',elbowLeft);aim('lowerarm_l','hand_l',handLeft);aim('hand_l','middle_01_l',handLeft.clone().add(V(0,0,.22)));aim('upperarm_r','lowerarm_r',elbowRight);aim('lowerarm_r','hand_r',handRight);aim('hand_r','middle_01_r',handRight.clone().add(V(0,0,.22)));model.updateMatrixWorld(true)}
+function supine(rotation){resetPose();pivot.rotation.x=-Math.PI/2;pivot.position.set(0,.18,-.1);model.updateMatrixWorld(true);for(const side of ['l','r']){const sign=side==='l'?1:-1,shoulder=wp(`upperarm_${side}`),elbow=V(sign*.76,.25,shoulder.z),wrist=V(sign*.76,.25+.5*(1-rotation),shoulder.z-.34*rotation);aim(`upperarm_${side}`,`lowerarm_${side}`,elbow);aim(`lowerarm_${side}`,`hand_${side}`,wrist)}model.updateMatrixWorld(true)}
+function periodicCatmull(values,position){const count=values.length,scaled=((position%1)+1)%1*count,index=Math.floor(scaled),local=scaled-index,p0=values[(index-1+count)%count],p1=values[index%count],p2=values[(index+1)%count],p3=values[(index+2)%count],local2=local*local,local3=local2*local;return .5*(2*p1+(-p0+p2)*local+(2*p0-5*p1+4*p2-p3)*local2+(-p0+3*p1-3*p2+p3)*local3)}
+const DIVE_CURVE={y:[.72,.67,.58,.54,.57,.68,.73,.72],z:[-.08,-.07,-.02,.08,.16,.15,.05,-.04],bend:[.08,.30,.68,.78,.66,.24,.10,.08],lean:[.05,.22,.66,1,.92,.50,.16,.07]};
+function pose(exercise,position){const wave=(1-Math.cos(position*Math.PI*2))/2;if(exercise.id==='supine'){supine(wave)}else if(exercise.id==='reach'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1,elbow=shoulder.clone().add(V(.04*sign,.02,.38*wave)),wrist=shoulder.clone().add(V(.05*sign,.04,.82*wave));support({left:{elbow,wrist},bend:.08,base:'knees'})}else if(exercise.id==='airplane'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1,elbow=shoulder.clone().add(V(.42*sign,.08*wave,.02)),wrist=shoulder.clone().add(V(.82*sign,.10*wave,.04));support({left:{elbow,wrist},bend:.08,base:'knees'})}else if(exercise.id==='row'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1;if(position<.52){const amount=(1-Math.cos(position/.52*Math.PI))/2;support({left:{elbow:shoulder.clone().add(V(.26*sign,.18*amount,-.12)),wrist:shoulder.clone().add(V(.12*sign,-.08+.22*amount,-.20))},bend:.1,base:'knees'})}else{const amount=(1-Math.cos((position-.52)/.48*Math.PI))/2;support({left:{elbow:shoulder.clone().add(V(.26*sign,.18,-.12)),wrist:shoulder.clone().add(V(.12*sign,.11,-.20-.62*amount))},bend:.1,base:'knees'})}}else if(exercise.id==='rotate'){resetPose();pivot.rotation.x=Math.PI/2;pivot.position.set(0,.72,0);model.updateMatrixWorld(true);const shoulder=wp('upperarm_l'),sign=shoulder.x>0?1:-1,elbow=shoulder.clone().add(V(.48*sign,.03,.02)),wrist=elbow.clone().add(V(0,.08+.48*wave,.28*(1-wave)));support({left:{elbow,wrist},bend:.1,base:'knees'})}else if(exercise.id==='shift'){support({x:Math.sin(position*Math.PI*2)*.18,bend:.14,base:supportMode})}else if(exercise.id==='clap'){let y=.74,bend=.08,handLift=0,handX=.27;if(position<.30){const amount=(1-Math.cos(position/.30*Math.PI))/2;y=.74-.30*amount;bend=.08+.58*amount}else if(position<.50){const amount=(1-Math.cos((position-.30)/.20*Math.PI))/2;y=.44+.37*amount;bend=.66*(1-amount);handLift=.14*amount;handX=.27-.20*amount}else if(position<.68){const amount=(1-Math.cos((position-.50)/.18*Math.PI))/2;y=.81-.07*amount;bend=.10*amount;handLift=.14*(1-amount);handX=.07+.20*amount}else{const amount=(1-Math.cos((position-.68)/.32*Math.PI))/2;bend=.10*(1-amount)}support({y,bend,handLift,handX,base:supportMode})}else if(exercise.id==='dive'){const y=periodicCatmull(DIVE_CURVE.y,position),z=periodicCatmull(DIVE_CURVE.z,position),bend=THREE.MathUtils.clamp(periodicCatmull(DIVE_CURVE.bend,position),.06,.82),lean=THREE.MathUtils.clamp(periodicCatmull(DIVE_CURVE.lean,position),0,1.05);support({y,z,bend,base:supportMode});leanTorso(lean);groundHands(bend)}updateOverlays(exercise)}
+function updateOverlays(exercise){if(!ready)return;overlayGroup.visible=showMuscles;const shoulder=wp('upperarm_l'),elbow=wp('lowerarm_l'),clavicle=wp('clavicle_l'),spine=wp('spine_03');overlay.shoulder.position.copy(shoulder);overlay.arm.position.copy(shoulder).lerp(elbow,.55);overlay.chest.position.copy(clavicle).add(V(-.06,-.06,.04));overlay.scapula.position.copy(spine).add(V(.16,.05,.05));const map={supine:[1,.8,.4,.8],reach:[1,.45,.7,1],airplane:[1,.55,.4,.9],row:[.75,1,.45,1],rotate:[1,.7,.35,.9],shift:[1,.65,.8,1],clap:[1,1,1,1],dive:[1,1,1,1]}[exercise.id],shapes=[[1.10,.52,.95],[.52,1.35,.52],[1.30,.40,.95],[1.18,.36,1.20]];Object.values(overlay).forEach((mesh,index)=>mesh.scale.set(shapes[index][0]*map[index],shapes[index][1]*map[index],shapes[index][2]*map[index]))}
+function currentModelCenter(target=new THREE.Vector3()){if(!ready||!model)return target.set(0,.62,.55);followBox.setFromObject(model).getCenter(target);target.y=THREE.MathUtils.clamp(target.y,.32,1.12);return target}
+function followModel(immediate=false){if(!ready)return;currentModelCenter(followCenter);followDelta.copy(followCenter).sub(controls.target).multiplyScalar(immediate?1:.14);controls.target.add(followDelta);camera.position.add(followDelta)}
+function frameCurrent(){const id=EXERCISES[current].id;if(id==='supine'){camera.position.set(4.7,2.75,-.35);controls.target.set(0,.42,-.25)}else if(id==='airplane'){camera.position.set(1.25,2.25,-4.25);controls.target.set(0,.58,.62)}else if(id==='dive'||id==='clap'||id==='shift'){camera.position.set(4.8,2.25,.85);controls.target.set(0,.55,.58)}else{camera.position.set(4.25,2.15,.85);controls.target.set(0,.58,.72)}followModel(true);controls.update()}
+function renderInfo(){const exercise=EXERCISES[current];ui.list.innerHTML=EXERCISES.map((item,index)=>`<button class="exercise ${index===current?'active':''}" data-n="${index}"><span class="n">${String(index+1).padStart(2,'0')}</span><span><strong>${item.title}</strong><small>${item.category}${item.advanced?' · validation requise':''}</small></span></button>`).join('');ui.list.querySelectorAll('button').forEach(button=>button.onclick=()=>{current=Number(button.dataset.n);t=0;renderInfo()});ui.num.textContent=String(current+1).padStart(2,'0');ui.title.textContent=exercise.title;ui.category.textContent=exercise.category;ui.level.textContent=exercise.advanced?'Avancé — hors séquence prudente':'Séquence prudente';ui.level.classList.toggle('advanced',Boolean(exercise.advanced));ui.summary.textContent=exercise.summary;ui.steps.innerHTML=exercise.steps.map(step=>`<li>${step}</li>`).join('');ui.cues.innerHTML=exercise.cues.map(cue=>`<li>${cue}</li>`).join('');ui.chips.innerHTML=exercise.muscles.map(([name,level])=>`<span class="chip ${level===3?'p':level===2?'s':'t'}">${name}</span>`).join('');[ui.sets.value,ui.reps.value,ui.load.value]=exercise.dose;ui.supportControl.hidden=!exercise.push;ui.supportButtons.forEach(button=>button.classList.toggle('active',button.dataset.support===supportMode));ui.supportNote.textContent=supportMode==='knees'?'Charge réduite : progression avant la variante sur les pieds.':'Charge supérieure : uniquement si le contrôle reste strict.';frameCurrent()}
+function phaseLabel(exercise,position){if(exercise.id==='dive'){if(position<.18)return'Recul contrôlé';if(position<.42)return'Descente continue';if(position<.64)return'Passage vers l’avant';if(position<.84)return'Repoussée';return'Retour continu'}if(exercise.id==='clap'){if(position<.30)return'Descente';if(position<.52)return'Poussée dynamique';if(position<.68)return'Réception';return'Stabilisation'}if(position<.12)return'Position initiale';if(position<.42)return'Mise en mouvement';if(position<.72)return'Phase active';return'Retour contrôlé'}
+function diagnostics(){const center=currentModelCenter(new THREE.Vector3()),jointNames=['upperarm_l','hand_l','upperarm_r','hand_r','calf_l','foot_l','ball_l','calf_r','foot_r','ball_r'],joints={};for(const name of jointNames)joints[name]=wp(name).toArray();return{ready,exercise:EXERCISES[current].id,supportMode,camera:{panEnabled:controls.enablePan,target:controls.target.toArray(),center:center.toArray(),distanceToCenter:controls.target.distanceTo(center),distance:camera.position.distanceTo(controls.target)},joints}}
+window.__APP_DIAGNOSTICS__=diagnostics;
+function loadModel(){new GLTFLoader().load('assets/quaternius/fullbody/Regular_Male_FullBody.gltf',gltf=>{model=gltf.scene;model.traverse(object=>{if(object.isMesh){object.castShadow=true;object.receiveShadow=true;object.frustumCulled=false}if(object.isBone)bones[object.name]=object});pivot.add(model);let box=new THREE.Box3().setFromObject(model),height=box.max.y-box.min.y;model.scale.setScalar(2/height);model.updateMatrixWorld(true);box.setFromObject(model);model.position.x-=(box.min.x+box.max.x)/2;model.position.y-=box.min.y;model.position.z-=(box.min.z+box.max.z)/2;model.updateMatrixWorld(true);for(const [name,bone] of Object.entries(bones))rest.set(name,{position:bone.position.clone(),quaternion:bone.quaternion.clone(),scale:bone.scale.clone()});ready=true;$('#loader').remove();document.documentElement.dataset.ready='true';pose(EXERCISES[current],t);frameCurrent()},undefined,error=>{$('#loader').textContent='Échec du chargement du modèle neutre';console.error(error)})}
+function resize(){const rect=host.getBoundingClientRect();renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(host);resize();
+ui.play.onclick=()=>{playing=!playing;ui.play.textContent=playing?'Pause':'Lecture'};ui.timeline.oninput=()=>{t=Number(ui.timeline.value)/1000;playing=false;ui.play.textContent='Lecture'};ui.muscles.onclick=()=>{showMuscles=!showMuscles;ui.muscles.classList.toggle('active',showMuscles)};ui.sequence.onclick=()=>{autoSequence=!autoSequence;sequencePosition=Math.max(0,PRUDENT_SEQUENCE.indexOf(current));if(autoSequence&&EXERCISES[current].advanced){sequencePosition=0;current=PRUDENT_SEQUENCE[0];t=0;renderInfo()}ui.sequence.textContent=autoSequence?'Arrêter':'Séquence prudente'};ui.supportButtons.forEach(button=>button.onclick=()=>{supportMode=button.dataset.support;ui.supportButtons.forEach(item=>item.classList.toggle('active',item===button));ui.supportNote.textContent=supportMode==='knees'?'Charge réduite : progression avant la variante sur les pieds.':'Charge supérieure : uniquement si le contrôle reste strict.'});
+document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{const view=button.dataset.view,center=currentModelCenter(new THREE.Vector3());controls.target.copy(center);if(view==='left')camera.position.copy(center).add(V(4.2,1.55,0));if(view==='front')camera.position.copy(center).add(V(0,1.65,-4.2));if(view==='back')camera.position.copy(center).add(V(0,1.65,4.2));controls.update()});$('#resetView').onclick=frameCurrent;
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(playing){t+=dt*(Number(ui.speed.value)||1)/5;if(t>=1){t%=1;if(autoSequence){sequencePosition=(sequencePosition+1)%PRUDENT_SEQUENCE.length;current=PRUDENT_SEQUENCE[sequencePosition];renderInfo()}}ui.timeline.value=String(t*1000)}if(ready){pose(EXERCISES[current],t);followModel(false)}ui.phase.textContent=phaseLabel(EXERCISES[current],t);ui.time.textContent=`${(t*5).toFixed(1).replace('.',',')} s`;controls.update();renderer.render(scene,camera);requestAnimationFrame(loop)}
+renderInfo();loadModel();requestAnimationFrame(loop);
