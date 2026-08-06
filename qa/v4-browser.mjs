@@ -26,6 +26,7 @@ async function setTimeline(page, value) {
 
 async function diagnostics(page) { return page.evaluate(() => window.__APP_DIAGNOSTICS__()); }
 function distance(a, b) { return Math.hypot(...a.map((value, index) => value - b[index])); }
+function maximumAbsolute(...values) { return Math.max(...values.map(value => Math.abs(value))); }
 
 const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl'] });
 const desktopContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, serviceWorkers: 'allow' });
@@ -52,9 +53,31 @@ await page.locator('[data-support="toes"]').click();
 await setTimeline(page, 300);
 const toeDiagnostics = await diagnostics(page);
 await page.locator('#viewer').screenshot({ path: `${out}/support-toes.png` });
-report.support = { knees: kneeDiagnostics.joints.calf_l, toes: toeDiagnostics.joints.calf_l, toeMode: toeDiagnostics.supportMode };
+const kneeGroundError = maximumAbsolute(
+  kneeDiagnostics.joints.calf_l[1] - 0.025,
+  kneeDiagnostics.joints.calf_r[1] - 0.025,
+  kneeDiagnostics.joints.hand_l[1] - 0.018,
+  kneeDiagnostics.joints.hand_r[1] - 0.018
+);
+const toeGroundError = maximumAbsolute(
+  toeDiagnostics.joints.ball_l[1] - 0.025,
+  toeDiagnostics.joints.ball_r[1] - 0.025,
+  toeDiagnostics.joints.hand_l[1] - 0.018,
+  toeDiagnostics.joints.hand_r[1] - 0.018
+);
+report.support = {
+  mode: toeDiagnostics.supportMode,
+  kneeGroundError,
+  toeGroundError,
+  knees: { left: kneeDiagnostics.joints.calf_l, right: kneeDiagnostics.joints.calf_r },
+  toes: { left: toeDiagnostics.joints.ball_l, right: toeDiagnostics.joints.ball_r },
+  kneeHands: { left: kneeDiagnostics.joints.hand_l, right: kneeDiagnostics.joints.hand_r },
+  toeHands: { left: toeDiagnostics.joints.hand_l, right: toeDiagnostics.joints.hand_r }
+};
 if (toeDiagnostics.supportMode !== 'toes') throw new Error('Toe support mode was not applied');
 if (toeDiagnostics.joints.calf_l[1] <= kneeDiagnostics.joints.calf_l[1] + 0.08) throw new Error('Toe support does not extend the knees away from the floor');
+if (kneeGroundError > 0.07) throw new Error(`Knee support is not grounded: ${kneeGroundError}`);
+if (toeGroundError > 0.07) throw new Error(`Toe support is not grounded: ${toeGroundError}`);
 await page.locator('[data-support="knees"]').click();
 
 await exercises.nth(7).click();
